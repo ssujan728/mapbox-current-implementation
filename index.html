@@ -1,0 +1,228 @@
+<html>
+
+<head>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <div>
+        <div id='map' style='width: 100%; height: 450px;'></div>
+    </div>
+
+    <script>
+
+        mapboxgl.accessToken = "pk.eyJ1IjoiaW50ZXJuYXRpb25hbHNvcyIsImEiOiJjamo1cDNpOWsxdnB2M3BzMjAzNWk1b2FoIn0.49i92ZK8WKifgkSEKtDB7Q";
+
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v9',
+            zoom: 2
+        });
+
+        map.on('load', function () {
+            var layers = map.getStyle().layers;
+            var firstSymbolId;
+            for (var i = 0; i < layers.length; i++) {
+                if (layers[i].type === 'symbol') {
+                    firstSymbolId = layers[i].id;
+                    break;
+                }
+            }
+
+            var LayerId = "Polygon_Japan";
+            var GeometryType = "MultiPolygon";
+            var Coordinates = null;
+            var Color = "#ffff75";
+            var Opacity = 1;
+
+            var IsCountry = false;
+
+            var MapBouds = {
+                MaxLat : null,
+                MinLat : null,
+                MaxLon: null,
+                MinLon: null
+            }
+
+            var mainBounds = null;
+
+            $.getJSON("jpn-polygon.txt", function (polygon) {
+                Coordinates = polygon;
+                //console.log(polygon);
+
+                $.getJSON("jpn-alerts.txt", function (response) {
+                    //console.log(alert);
+                    response.alerts.forEach(alert => {
+                        //console.log(alert.alertId);
+                        alert.locations.features.forEach(feature => {
+                            if (feature.properties.ImpactType == "Country" && IsCountry == false)
+                                IsCountry = true;
+                        });
+                    });
+
+                    var auxilary = Location_GetCoordinatesAndBounds(Coordinates);
+                    var expandedBound = ExpandBounds(mainBounds,auxilary,true); //has to be true for the country... current row number is being used.
+                    
+                    //console.log(expandedBound);
+                    //console.log(auxilary);
+
+                    map.addLayer({
+                        id: LayerId,
+                        type: 'fill',
+                        source: {
+                            type: 'geojson',
+                            data: {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': GeometryType,
+                                    'coordinates': Coordinates
+                                }
+                            }
+                        },
+                        'layout': {},
+                        'paint': {
+                            'fill-color': Color,
+                            'fill-opacity': Opacity
+                        }
+                    }, firstSymbolId);
+
+
+                    // Loop the alerts
+                    response.alerts.forEach(alert => {
+                        //console.log(alert.alertId);
+                        alert.locations.features.forEach(feature => {
+                            var tempCoordinate = {
+                                Latitude: 0,
+                                Longitude:0
+                            }
+                            feature.geometry.coordinates.forEach(function(coordinate,index) {
+                                if(feature.properties.CountryIsoList == "JPN"){//make it dynamic
+                                    if(index == 0){
+                                        tempCoordinate.Latitude = coordinate; // first element [0] will be the latitude
+                                        return;
+                                    }else{
+                                        tempCoordinate.Longitude = coordinate;
+                                    }
+
+                                    console.log(tempCoordinate);
+                                }else{
+                                    return;
+                                }
+                            })
+                        });
+                    });
+
+                });
+
+
+            });
+        })
+
+        // Get the data stored in the database depending ISO and ISO2
+        // For now load the info from the jpn-polygon.txt
+        function Location_GetCoordinatesAndBounds(polygon) {
+
+            var Auxilary = {
+                MaxLat : null,
+                MinLat : null,
+                MaxLon: null,
+                MinLon: null
+            }
+
+            var polygonString = JSON.stringify(polygon);
+            
+            polygonString = polygonString.replace(/\[\[\[/g, '[');
+            polygonString = polygonString.replace(/\[\[/g, "[");
+
+            polygonString = polygonString.replace(/\]\]\]/g, "]");
+            polygonString = polygonString.replace(/\]\]/g, "]");
+
+            polygonString = polygonString.replace(/\[/g, "{\"Lat\":");
+            polygonString = polygonString.replace(/\]\,/g, "#");
+
+            polygonString = polygonString.replace(/\,/g, ",\"Lon\":")
+            polygonString = polygonString.replace(/\#/g, "},")
+            polygonString = polygonString.replace(/\]/g, "}")
+
+            polygonString = "[" + polygonString + "]";
+            //console.log(polygonString)
+            var polygonString = JSON.parse(JSON.stringify(polygonString));
+
+            var polygonObject = JSON.parse(polygonString);
+            polygonObject.sort(sortLatitude);
+
+            Auxilary.MinLat = polygonObject[0].Lat;
+            Auxilary.MaxLat = polygonObject[polygonObject.length-1].Lat
+
+            polygonObject.sort(sortLongitude);
+
+            Auxilary.MinLon = polygonObject[0].Lon;
+            Auxilary.MaxLon = polygonObject[polygonObject.length-1].Lon;
+
+            return Auxilary;
+        }
+
+        function ExpandBounds(mainBounds,newBounds,defaultBounds){
+            var expandedBounds = {
+                MaxLat: null,
+                MinLat: null,
+                MaxLon: null,
+                MinLon: null
+            }
+
+            if(defaultBounds === true){                
+                expandedBounds = newBounds;
+            }else{
+                if(mainBounds.MaxLat >= newBounds.MaxLat){
+                    expandedBounds.MaxLat = mainBounds.MaxLat;
+                }else{
+                    expandedBounds.MaxLat = newBounds.MaxLat;
+                }
+
+                if(mainBounds.MaxLon >= newBounds.MaxLon){
+                    expandedBounds.MaxLon = mainBounds.MaxLon;
+                }else{
+                    expandedBounds.MaxLon = newBounds.MaxLon;
+                }
+
+                if(mainBounds.MinLat >= newBounds.MinLat){
+                    expandedBounds.MinLat = mainBounds.MinLat;
+                }else{
+                    expandedBounds.MinLat = newBounds.MinLat;
+                }
+
+                if(mainBounds.MinLon >= newBounds.MinLon){
+                    expandedBounds.MinLon = mainBounds.MinLon;
+                }else{
+                    expandedBounds.MinLon = newBounds.MinLon;
+                }
+
+            }
+            return expandedBounds;
+
+
+        }
+
+        function sortLatitude(a, b) {
+            if (a.Lat < b.Lat)
+                return -1;
+            if (a.Lat > b.Lat)
+                return 1;
+            return 0;
+        }
+
+        function sortLongitude(a, b) {
+            if (a.Lon < b.Lon)
+                return -1;
+            if (a.Lon > b.Lon)
+                return 1;
+            return 0;
+        }
+    </script>
+
+</body>
+
+</html>

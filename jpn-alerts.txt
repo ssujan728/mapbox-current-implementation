@@ -1,0 +1,159 @@
+{
+   "alerts":[
+      {
+         "alertId":"e67f3147-905a-4cc4-8bd1-69eb697fc95c",
+         "status":"Active",
+         "service":"Medical",
+         "severity":"Advisory",
+         "severityAttributes":{
+            "Name":"Advisory",
+            "Rank":"2",
+            "Icon":"https://ecms-stg-delivery.internationalsos.com//-/media/dynamic-content/severity-icons/severity2.png",
+            "Color":"#ef820f"
+         },
+         "locations":{
+            "features":[
+               {
+                  "properties":{
+                     "ImpactType":"Country",
+                     "ImpactRadius":"0",
+                     "Name":"Japan",
+                     "IsPrimary":true,
+                     "CountryIsoList":"JPN",
+                     "CountryNameList":"Japan"
+                  },
+                  "geometry":{
+                     "coordinates":[
+                        138.59223,
+                        36.386493
+                     ],
+                     "type":"Point"
+                  },
+                  "type":"Feature"
+               }
+            ],
+            "type":"FeatureCollection"
+         },
+         "titleLocation":"Japan",
+         "title":"Heat related health risks",
+         "summary":"<p><p><strong>Latest update: heatwave continues.</strong> Unusually high temperatures have been recorded nationwide. Exposure to excessive temperatures for a sustained period can pose health risks ranging from relatively mild rashes and sunburn up to heat stroke, a medical emergency. To prevent heat-related illnesses, keep yourself hydrated and avoid exposure to heat.<br />\n<div>&nbsp;</div>\n</p></p>",
+         "createdDate":"2018-07-25T04:00:35.0000000Z",
+         "updatedDate":"2018-08-13T07:00:33.0000000Z",
+         "categories":[
+            "Heat"
+         ],
+         "activeTo":"",
+         "activeFrom":"2018-07-24T00:00:00.0000000Z",
+         "sites":{
+            "affectedSitesCount":null,
+            "description":"Building/Sites affected",
+            "url":null
+         },
+         "members":{
+            "affectedMembersCount":null,
+            "url":"https://tracker.travelsecurity.fr"
+         },
+         "exposureSummary":{
+            "counts":[
+               {
+                  "criteriaSetId":"V",
+                  "description":"Travelers at the time the alert was published",
+                  "count":0,
+                  "url":"https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD1FNjdGMzE0Ny05MDVBLTRDQzQtOEJEMS02OUVCNjk3RkM5NUMmc3RhcnRkYXRlPTcvMjQvMjAxOCZlbmRkYXRlPTcvMjQvMjAxOCZpbmNsdWRlbm9uZXhwYXRzPXRydWUmaW5jbHVkZWV4cGF0cz1mYWxzZSZ2aWV3dHlwZT1hbGVydA=="
+               },
+               {
+                  "criteriaSetId":"X",
+                  "description":"Travelers there 30 days from the date of publication",
+                  "count":0,
+                  "url":"https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD1FNjdGMzE0Ny05MDVBLTRDQzQtOEJEMS02OUVCNjk3RkM5NUMmc3RhcnRkYXRlPTcvMjQvMjAxOCZlbmRkYXRlPTgvMjMvMjAxOCZpbmNsdWRlbm9uZXhwYXRzPXRydWUmaW5jbHVkZWV4cGF0cz1mYWxzZSZ2aWV3dHlwZT1hbGVydA=="
+               },
+               {
+                  "criteriaSetId":"Y",
+                  "description":"International assignee affected",
+                  "count":0,
+                  "url":"https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD1FNjdGMzE0Ny05MDVBLTRDQzQtOEJEMS02OUVCNjk3RkM5NUMmc3RhcnRkYXRlPTcvMjQvMjAxOCZlbmRkYXRlPTcvMjQvMjAxOCZpbmNsdWRlbm9uZXhwYXRzPWZhbHNlJmluY2x1ZGVleHBhdHM9dHJ1ZSZ2aWV3dHlwZT1hbGVydA=="
+               }
+            ]
+         }
+      },
+      {
+         "alertId":"cb19cd55-d273-4954-bd29-172ce9d5fd2e",
+         "status":"Active",
+         "service":"Security",
+         "severity":"Notice",
+         "severityAttributes":{
+            "Name":"Notice",
+            "Rank":"1",
+            "Icon":"https://ecms-stg-delivery.internationalsos.com//-/media/dynamic-content/severity-icons/severity1.png",
+            "Color":"#009354"
+         },
+         "locations":{
+            "features":[
+               {
+                  "properties":{
+                     "ImpactType":"Country",
+                     "ImpactRadius":"0",
+                     "Name":"Japan",
+                     "IsPrimary":true,
+                     "CountryIsoList":"JPN",
+                     "CountryNameList":"Japan"
+                  },
+                  "geometry":{
+                     "coordinates":[
+                        139.780426,
+                        35.545915
+                     ],
+                     "type":"Point"
+                  },
+                  "type":"Feature"
+               }
+            ],
+            "type":"FeatureCollection"
+         },
+         "titleLocation":"Japan",
+         "title":"All Nippon Airways to extend domestic cancellations to three international routes between 1 September, 28 October; reconfirm schedules",
+         "summary":"<p>Members due to undertake travel with All Nippon Airways (ANA) until at least <strong>28 October</strong> should reconfirm their flights, after the airline extended recent domestic cancellations to three international routes to facilitate aircraft inspections. Meanwhile, cancellations of flights between the capital Tokyo&rsquo;s Haneda International Airport (<a href=\"http://www.haneda-airport.jp/inter/en/\" target=\"_blank\">HND</a>) and 11 domestic destinations, including Fukuoka (Kyushu region), Hiroshima (Chugoku region) and Osaka (Kansai region), will continue until at least <strong>31 August</strong>. Further such measures are expected to be announced on <strong>21 August</strong>. </p>",
+         "createdDate":"2018-08-10T09:19:05.0000000Z",
+         "updatedDate":"2018-08-10T09:19:05.0000000Z",
+         "categories":[
+            "Airline disruption"
+         ],
+         "activeTo":"2018-10-30T00:00:00.0000000Z",
+         "activeFrom":"2018-08-10T00:00:00.0000000Z",
+         "sites":{
+            "affectedSitesCount":null,
+            "description":"Building/Sites affected",
+            "url":null
+         },
+         "members":{
+            "affectedMembersCount":null,
+            "url":"https://tracker.travelsecurity.fr"
+         },
+         "exposureSummary":{
+            "counts":[
+               {
+                  "criteriaSetId":"Y",
+                  "description":"International assignee affected",
+                  "count":0,
+                  "url":"https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD1DQjE5Q0Q1NS1EMjczLTQ5NTQtQkQyOS0xNzJDRTlENUZEMkUmc3RhcnRkYXRlPTgvMTAvMjAxOCZlbmRkYXRlPTEwLzMwLzIwMTgmaW5jbHVkZW5vbmV4cGF0cz1mYWxzZSZpbmNsdWRlZXhwYXRzPXRydWUmdmlld3R5cGU9YWxlcnQ="
+               },
+               {
+                  "criteriaSetId":"V",
+                  "description":"Travelers at the time the alert was published",
+                  "count":0,
+                  "url":"https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD1DQjE5Q0Q1NS1EMjczLTQ5NTQtQkQyOS0xNzJDRTlENUZEMkUmc3RhcnRkYXRlPTgvMTAvMjAxOCZlbmRkYXRlPTEwLzMwLzIwMTgmaW5jbHVkZW5vbmV4cGF0cz10cnVlJmluY2x1ZGVleHBhdHM9ZmFsc2Umdmlld3R5cGU9YWxlcnQ="
+               },
+               {
+                  "criteriaSetId":"W",
+                  "description":"Travelers there while the alert is active",
+                  "count":0,
+                  "url":"https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD1DQjE5Q0Q1NS1EMjczLTQ5NTQtQkQyOS0xNzJDRTlENUZEMkUmc3RhcnRkYXRlPTgvMTAvMjAxOCZlbmRkYXRlPTEwLzMwLzIwMTgmaW5jbHVkZW5vbmV4cGF0cz10cnVlJmluY2x1ZGVleHBhdHM9ZmFsc2Umdmlld3R5cGU9YWxlcnQ="
+               }
+            ]
+         }
+      }
+   ],
+   "page":1,
+   "showing":2,
+   "totalHits":2
+}
