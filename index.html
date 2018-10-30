@@ -10,6 +10,7 @@
 
     <div>
         <div id='map' style='width: 100%; height: 450px;'></div>
+        <img style="display:none" id="image_warning" src="img/warning2.png" />
     </div>
 
     <script>
@@ -41,8 +42,8 @@
             var IsCountry = false;
 
             var MapBouds = {
-                MaxLat : null,
-                MinLat : null,
+                MaxLat: null,
+                MinLat: null,
                 MaxLon: null,
                 MinLon: null
             }
@@ -64,8 +65,8 @@
                     });
 
                     var auxilary = Location_GetCoordinatesAndBounds(Coordinates);
-                    var expandedBound = ExpandBounds(mainBounds,auxilary,true); //has to be true for the country... current row number is being used.
-                    
+                    var expandedBound = ExpandBounds(mainBounds, auxilary, true); //has to be true for the country... current row number is being used.
+
                     //console.log(expandedBound);
                     //console.log(auxilary);
 
@@ -89,6 +90,7 @@
                         }
                     }, firstSymbolId);
 
+                    var coordinateList = [];
 
                     // Loop the alerts
                     response.alerts.forEach(alert => {
@@ -96,19 +98,28 @@
                         alert.locations.features.forEach(feature => {
                             var tempCoordinate = {
                                 Latitude: 0,
-                                Longitude:0
+                                Longitude: 0
                             }
-                            feature.geometry.coordinates.forEach(function(coordinate,index) {
-                                if(feature.properties.CountryIsoList == "JPN"){//make it dynamic
-                                    if(index == 0){
+                            feature.geometry.coordinates.forEach(function (coordinate, index) {
+                                if (feature.properties.CountryIsoList == "JPN") {//make it dynamic
+                                    if (index == 0) {
                                         tempCoordinate.Latitude = coordinate; // first element [0] will be the latitude
                                         return;
-                                    }else{
+                                    } else {
                                         tempCoordinate.Longitude = coordinate;
                                     }
 
-                                    console.log(tempCoordinate);
-                                }else{
+                                    coordinateList = [];
+                                    coordinateList.push(tempCoordinate);
+
+                                    var layerId = "Image" + alert.alertId + index;
+                                    var radiusId = "Radius" + alert.alertId + index;
+
+                                    var imageUrl = $("#image_warning")[0].src;
+
+                                    AddImageLayerToMapbox(layerId, coordinateList, "", imageUrl);
+
+                                } else {
                                     return;
                                 }
                             })
@@ -126,14 +137,16 @@
         function Location_GetCoordinatesAndBounds(polygon) {
 
             var Auxilary = {
-                MaxLat : null,
-                MinLat : null,
+                MaxLat: null,
+                MinLat: null,
                 MaxLon: null,
                 MinLon: null
             }
 
             var polygonString = JSON.stringify(polygon);
-            
+
+            //console.log(polygonString);
+
             polygonString = polygonString.replace(/\[\[\[/g, '[');
             polygonString = polygonString.replace(/\[\[/g, "[");
 
@@ -155,17 +168,17 @@
             polygonObject.sort(sortLatitude);
 
             Auxilary.MinLat = polygonObject[0].Lat;
-            Auxilary.MaxLat = polygonObject[polygonObject.length-1].Lat
+            Auxilary.MaxLat = polygonObject[polygonObject.length - 1].Lat
 
             polygonObject.sort(sortLongitude);
 
             Auxilary.MinLon = polygonObject[0].Lon;
-            Auxilary.MaxLon = polygonObject[polygonObject.length-1].Lon;
+            Auxilary.MaxLon = polygonObject[polygonObject.length - 1].Lon;
 
             return Auxilary;
         }
 
-        function ExpandBounds(mainBounds,newBounds,defaultBounds){
+        function ExpandBounds(mainBounds, newBounds, defaultBounds) {
             var expandedBounds = {
                 MaxLat: null,
                 MinLat: null,
@@ -173,30 +186,30 @@
                 MinLon: null
             }
 
-            if(defaultBounds === true){                
+            if (defaultBounds === true) {
                 expandedBounds = newBounds;
-            }else{
-                if(mainBounds.MaxLat >= newBounds.MaxLat){
+            } else {
+                if (mainBounds.MaxLat >= newBounds.MaxLat) {
                     expandedBounds.MaxLat = mainBounds.MaxLat;
-                }else{
+                } else {
                     expandedBounds.MaxLat = newBounds.MaxLat;
                 }
 
-                if(mainBounds.MaxLon >= newBounds.MaxLon){
+                if (mainBounds.MaxLon >= newBounds.MaxLon) {
                     expandedBounds.MaxLon = mainBounds.MaxLon;
-                }else{
+                } else {
                     expandedBounds.MaxLon = newBounds.MaxLon;
                 }
 
-                if(mainBounds.MinLat >= newBounds.MinLat){
+                if (mainBounds.MinLat >= newBounds.MinLat) {
                     expandedBounds.MinLat = mainBounds.MinLat;
-                }else{
+                } else {
                     expandedBounds.MinLat = newBounds.MinLat;
                 }
 
-                if(mainBounds.MinLon >= newBounds.MinLon){
+                if (mainBounds.MinLon >= newBounds.MinLon) {
                     expandedBounds.MinLon = mainBounds.MinLon;
-                }else{
+                } else {
                     expandedBounds.MinLon = newBounds.MinLon;
                 }
 
@@ -204,6 +217,53 @@
             return expandedBounds;
 
 
+        }
+
+        //coordinates => array
+        //coordinates => string        
+        function AddImageLayerToMapbox(layerId, coordinates, coordinatesString, imageUrl) {
+            console.log('ccc');
+            console.log(coordinates);
+            var CalculatedCoordinatesString = "";
+            var TempCoordinatesList = []
+
+            if (coordinates.length > 0) {
+                coordinates.forEach(coordinate => {
+                    CalculatedCoordinatesString += CalculatedCoordinatesString + "[" + coordinate.Latitude + "," + coordinate.Longitude + "],"
+                    TempCoordinatesList.push(coordinate.Latitude);
+                    TempCoordinatesList.push(coordinate.Longitude);
+
+                })
+            } else {
+                CalculatedCoordinatesString = coordinatesString;
+            }
+            console.log('ddd')
+            console.log(TempCoordinatesList);
+            map.loadImage(imageUrl, function (error, image) {
+                map.addImage(layerId, image);
+                map.addLayer({
+                    id:  layerId,
+                    type: 'symbol',
+
+                    source: {
+                        type: 'geojson',
+                        data: {
+                            type: 'FeatureCollection',
+                            features: [{
+                                type: 'Feature',
+                                geometry: {
+                                    type: 'Point',
+                                    coordinates: TempCoordinatesList 
+                                }
+                            }]
+                        }
+                    },
+                    'layout': {
+                        'icon-image': layerId,
+                        'icon-size': 0.40
+                    }
+                });
+            });
         }
 
         function sortLatitude(a, b) {
