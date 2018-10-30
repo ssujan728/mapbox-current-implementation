@@ -118,6 +118,11 @@
                                     var imageUrl = $("#image_warning")[0].src;
 
                                     AddImageLayerToMapbox(layerId, coordinateList, "", imageUrl);
+                                    AddRadiusLayerToMapbox(radiusId, imageUrl, feature.properties.ImpactRadius, tempCoordinate.Longitude, tempCoordinate.Latitude, '', 1)
+                                    AddPopupOnClick(layerId,tempCoordinate.Longitude,tempCoordinate.Latitude,'https://google.com','Google','Halo Halo Halo');
+
+                                    tempCoordinate.Latitude = 0;
+                                    tempCoordinate.Longitude = 0;
 
                                 } else {
                                     return;
@@ -125,6 +130,23 @@
                             })
                         });
                     });
+                    
+                   
+
+                    var bounds = [];
+                    var tempBound = [];
+                    tempBound.push(expandedBound.MinLat);
+                    tempBound.push(expandedBound.MinLon);
+                    bounds.push(tempBound);
+
+                    var tempBound = [];
+                    tempBound.push(expandedBound.MaxLat);
+                    tempBound.push(expandedBound.MaxLon);
+                    bounds.push(tempBound);
+
+                    console.log(bounds);
+
+                    map.fitBounds(bounds,{padding:10});
 
                 });
 
@@ -222,8 +244,7 @@
         //coordinates => array
         //coordinates => string        
         function AddImageLayerToMapbox(layerId, coordinates, coordinatesString, imageUrl) {
-            console.log('ccc');
-            console.log(coordinates);
+
             var CalculatedCoordinatesString = "";
             var TempCoordinatesList = []
 
@@ -237,12 +258,12 @@
             } else {
                 CalculatedCoordinatesString = coordinatesString;
             }
-            console.log('ddd')
+
             console.log(TempCoordinatesList);
             map.loadImage(imageUrl, function (error, image) {
                 map.addImage(layerId, image);
                 map.addLayer({
-                    id:  layerId,
+                    id: layerId,
                     type: 'symbol',
 
                     source: {
@@ -253,7 +274,7 @@
                                 type: 'Feature',
                                 geometry: {
                                     type: 'Point',
-                                    coordinates: TempCoordinatesList 
+                                    coordinates: TempCoordinatesList
                                 }
                             }]
                         }
@@ -265,6 +286,115 @@
                 });
             });
         }
+
+        function AddRadiusLayerToMapbox(layerId, imageUrl, radius, long, lat, color, opacity) {
+            var center = [];
+            center.push(lat);
+            center.push(long);
+
+            map.addSource(layerId, createGeoJSONCircle(center, radius));
+            var layers = map.getStyle().layers;
+            var firstSymbolId;
+            for (var i = 0; i < layers.length; i++) {
+                if (layers[i].type === 'symbol') {
+                    firstSymbolId = layers[i].id;
+                    break;
+                }
+            }
+
+            map.addLayer({
+                'id': layerId,
+                'type': 'fill',
+                'source': layerId,
+                'layout': {},
+                'paint': {
+                    'fill-color': 'red',
+                    'fill-opacity': opacity
+                }
+            }, firstSymbolId);
+
+        }
+
+        function AddPopupOnClick(layerId,longitude,latitude,titleLink,title,otherText) {
+            var layersArrary = [];
+            layersArrary.push(layerId);
+
+            var coordianteArray = [];
+            coordianteArray.push(longitude)
+            coordianteArray.push(latitude)
+
+            map.on('click', function (e) {
+                var features = map.queryRenderedFeatures(e.point, {
+                    layers: layersArrary
+                });
+
+                if (!features.length) {
+                    return;
+                }
+
+                var feature = features[0];
+
+                // for the style
+                var style = ""
+                if(otherText == ""){
+                    style = "display:none";
+                }else{
+                    style = "";
+                }
+
+                var popup = new mapboxgl.Popup({className:'mapbox-bg-High'})
+                    .setLngLat(coordianteArray)
+                    .setHTML("<div>")
+                    .setHTML("<a href=" + titleLink + ">")
+                    .setHTML("<p><b>" + title + "</b></p>")
+                    .setHTML("</a>")
+                    .setHTML("<p style=" + style + ">" + otherText + '</p>')
+                    .setHTML("</div>")
+                    .setLngLat(coordianteArray)
+                    .addTo(map);
+
+            });
+        }
+
+
+        var createGeoJSONCircle = function (center, radiusInKm, points) {
+            if (!points) points = 64;
+
+            var coords = {
+                latitude: center[1],
+                longitude: center[0]
+            };
+
+            var km = radiusInKm;
+
+            var ret = [];
+            var distanceX = km / (111.320 * Math.cos(coords.latitude * Math.PI / 180));
+            var distanceY = km / 110.574;
+
+            var theta, x, y;
+            for (var i = 0; i < points; i++) {
+                theta = (i / points) * (2 * Math.PI);
+                x = distanceX * Math.cos(theta);
+                y = distanceY * Math.sin(theta);
+
+                ret.push([coords.longitude + x, coords.latitude + y]);
+            }
+            ret.push(ret[0]);
+
+            return {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: [{
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Polygon',
+                            coordinates: ret
+                        }
+                    }]
+                }
+            };
+        };
 
         function sortLatitude(a, b) {
             if (a.Lat < b.Lat)
