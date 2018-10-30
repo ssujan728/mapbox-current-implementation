@@ -1,0 +1,273 @@
+{
+    "alertId": "93fad4f5-4370-4328-8edb-f25f98239bd2",
+    "assessment": "",
+    "managerAdvice": "<p><ul style=\"list-style-type: disc;\">\n    <li style=\"background: white;\"><span>Monitor the JMA <a href=\"http://mailgun.internationalsos.com/c/eJxtj82KhDAQhJ9GbwnmXw85mIkOws5J2HvQHnXQKCaDu2-_uQ4sFE0XdNFfjZoDGZ55v0QY9hO6CNs3nGHZvSb5rIFUhSqZKInjlWIjfZYKaMVZOVaUAc9XPcd4ZKzOaJt0XRd-bQ5PO34dyac9zcWP8AN4jtv68enL-entJtDg80ULYZkVXKK2qTnipjGolJYiUsibksK0oqQZL87wDmGLB158hNO7mFjdGvaAh33LT70tw-xgxdMJ4CEF_r3rf0MC6EYtPog6qzNlasMbIkWBhDEScdsIZGpySySWydawoq5Upmx-f_QPCCE1SDnBBVWUyj9bXmm-\" target=\"_blank\">website</a> for up-to-date information on prevailing weather conditions, and be prepared to adjust itineraries accordingly. </span></li>\n    <li style=\"background: white;\"><span>We do not hold information on specific flights or other modes of transport. Reconfirm flight, ferry and other transport bookings with the relevant service provider. In the event of any cancellations, your travel agent will be able to assist with alternative arrangements. </span></li>\n    <li style=\"background: white;\"><span>Stay away from low-lying coastal areas and rivers, which remain susceptible to flooding. </span></li>\n    <li style=\"background: white;\"><span>Road journeys may take longer than usual following heavy rain, due to blocked routes and poor driving conditions. Allow additional time for journeys in or through affected areas. Ensure that your vehicle is in good condition and appropriately equipped for the weather conditions before setting out.</span></li>\n    <li style=\"background: white;\"><span></span>Monitor our alerts on Japan for any notable developments.</li>\n</ul></p>",
+    "moreDetail": "<p><ul style=\"list-style-type: disc;\">\n    <li style=\"background: white;\"><span>Monitor the JMA <a href=\"http://mailgun.internationalsos.com/c/eJxtj82KhDAQhJ9GbwnmXw85mIkOws5J2HvQHnXQKCaDu2-_uQ4sFE0XdNFfjZoDGZ55v0QY9hO6CNs3nGHZvSb5rIFUhSqZKInjlWIjfZYKaMVZOVaUAc9XPcd4ZKzOaJt0XRd-bQ5PO34dyac9zcWP8AN4jtv68enL-entJtDg80ULYZkVXKK2qTnipjGolJYiUsibksK0oqQZL87wDmGLB158hNO7mFjdGvaAh33LT70tw-xgxdMJ4CEF_r3rf0MC6EYtPog6qzNlasMbIkWBhDEScdsIZGpySySWydawoq5Upmx-f_QPCCE1SDnBBVWUyj9bXmm-\" target=\"_blank\">website</a> for up-to-date information on prevailing weather conditions, and be prepared to adjust itineraries accordingly. </span></li>\n    <li style=\"background: white;\"><span>We do not hold information on specific flights or other modes of transport. Reconfirm flight, ferry and other transport bookings with the relevant service provider. In the event of any cancellations, your travel agent will be able to assist with alternative arrangements. </span></li>\n    <li style=\"background: white;\"><span>Stay away from low-lying coastal areas and rivers, which remain susceptible to flooding. </span></li>\n    <li style=\"background: white;\"><span>Road journeys may take longer than usual following heavy rain, due to blocked routes and poor driving conditions. Allow additional time for journeys in or through affected areas. Ensure that your vehicle is in good condition and appropriately equipped for the weather conditions before setting out.</span></li>\n    <li style=\"background: white;\"><span></span>Monitor our alerts on Japan for any notable developments.</li>\n</ul></p>",
+    "travellerAdvice": "<p><ul style=\"list-style-type: disc;\">\n    <li style=\"background: white;\"><span>Monitor the JMA <a href=\"http://mailgun.internationalsos.com/c/eJxtj82KhDAQhJ9GbwnmXw85mIkOws5J2HvQHnXQKCaDu2-_uQ4sFE0XdNFfjZoDGZ55v0QY9hO6CNs3nGHZvSb5rIFUhSqZKInjlWIjfZYKaMVZOVaUAc9XPcd4ZKzOaJt0XRd-bQ5PO34dyac9zcWP8AN4jtv68enL-entJtDg80ULYZkVXKK2qTnipjGolJYiUsibksK0oqQZL87wDmGLB158hNO7mFjdGvaAh33LT70tw-xgxdMJ4CEF_r3rf0MC6EYtPog6qzNlasMbIkWBhDEScdsIZGpySySWydawoq5Upmx-f_QPCCE1SDnBBVWUyj9bXmm-\" target=\"_blank\">website</a> for up-to-date information on prevailing weather conditions, and be prepared to adjust itineraries accordingly. </span></li>\n    <li style=\"background: white;\"><span>We do not hold information on specific flights or other modes of transport. Reconfirm flight, ferry and other transport bookings with the relevant service provider. In the event of any cancellations, your travel agent will be able to assist with alternative arrangements. </span></li>\n    <li style=\"background: white;\"><span>Stay away from low-lying coastal areas and rivers, which remain susceptible to flooding. </span></li>\n    <li style=\"background: white;\"><span>Road journeys may take longer than usual following heavy rain, due to blocked routes and poor driving conditions. Allow additional time for journeys in or through affected areas. Ensure that your vehicle is in good condition and appropriately equipped for the weather conditions before setting out.</span></li>\n    <li style=\"background: white;\"><span></span>Monitor our alerts on Japan for any notable developments.</li>\n</ul></p>",
+    "categories": [
+        "Transport disruption",
+        "Storm",
+        "Civil unrest"
+    ],
+    "severityAttributes": {
+        "Name": "Advisory",
+        "Rank": "2",
+        "Icon": "https://ecms-stg-delivery.internationalsos.com//-/media/dynamic-content/severity-icons/severity2.png",
+        "Color": "#ef820f"
+    },
+    "status": "Active",
+    "service": "Security",
+    "locations": {
+        "features": [
+            {
+                "properties": {
+                    "ImpactType": "Country",
+                    "ImpactRadius": "0",
+                    "Name": "Japan",
+                    "IsPrimary": true,
+                    "CountryIsoList": "JPN",
+                    "CountryNameList": "Japan"
+                },
+                "geometry": {
+                    "coordinates": [
+                        138.59223,
+                        36.386493
+                    ],
+                    "type": "Point"
+                },
+                "type": "Feature"
+            },
+            {
+                "properties": {
+                    "ImpactType": "Local",
+                    "ImpactRadius": "50",
+                    "Name": "Osaka Ohsho",
+                    "IsPrimary": false,
+                    "CountryIsoList": "KOR",
+                    "CountryNameList": "South Korea"
+                },
+                "geometry": {
+                    "coordinates": [
+                        128.693848,
+                        35.603719
+                    ],
+                    "type": "Point"
+                },
+                "type": "Feature"
+            }
+        ],
+        "type": "FeatureCollection"
+    },
+    "titleLocation": "Japan, South Korea",
+    "title": "Hokkaido: Maintain flexible itineraries during passage of former typhoon Kong-rey",
+    "summary": "<p><span>Members in southern Hokkaido island should anticipate disruption during the passage of former typhoon Kong-rey until at least 7 October. The storm is currently moving away from South Korea and is expected to make landfall in Japan near <a href=\"http://mailgun.internationalsos.com/c/eJxtj82KhDAQhJ9GbxET04lzyMFMdBFmFhaXuYekRwV_Zk087NtvrgMLfahquqivveJI3TMf5ohuP7CPuD7wCPO-KZpPivqn9bK0deVACl9578rLxSXBvAXO8kVNMb5CVjUZ69KM-16MSxKrTdvkR_pz3uzn9-OLvbXc7DaedkSFWz4rAFMZ4IJ0bcMJ160mtTCM0FJcpQDdQc0yXh7hDGGNr2LeIh6bjYnTLmEPhdvX_FDr7CaLSzEeiBumwL93w29IAL1X8EbUG5VJ3WjeUgElAa0F4aYFoht6TSSmEp2uyuYiM2nyj_twxxDSBykHHJhkTPwBoyhpJg\" target=\"_blank\">Matsumae</a> (Hokkaido prefecture) early on 7 October as a severe tropical storm (fourth-highest on the Japan Meteorological Agency (JMA)'s six-tier scale). Although flights are currently operating normally at Hakodate (<a href=\"http://mailgun.internationalsos.com/c/eJxtjz2LxCAYhH9N0hli9NVsYRHX5AjcVgvXi3nzsSQmqFvcvz_bhYNpBmaGZybFkbq5fG4J3RlwTHj8YIjb6RUtVwWSMYCpFTNvW2dnV6MTN4nzTCmfpC13taZ0xYJ1RTNk2S1cZ0iVx-p1Zf-x_G398rYLKvTlpgAMM8AFGfqOE657TVphGkJrcZcC9ABtU_A6xHeMR7qqzScM3qbMZvd4xsqdRxnUsbnV4l4tAdFjLvybe_7GDDBOCj6IRqMKqTvNeyqgJqC1INz0QHRH75nEMDFoVnc3WUhTfj2eD4wxP8g94NDIphF_nThlSQ\" target=\"_blank\">HKD</a>) and New Chitose International (<a href=\"http://mailgun.internationalsos.com/c/eJxtkM2KhDAQhJ9Gb5HE_OgccjATXYSdk7D3bOzRLBolySD79pvrwELRl66iv65ZMiD2WU4ugT0CjAn2LwjRHV6ScpWtpULMlmB4fgOjZsa8boyleOYU30hbbnJN6SxoV9RD1nVdlYcL2dWlIwIyLpxHSNXPmZfg83g79Wn88jILSPClk5xrqjkTaOg7hpjqFWqFrhHB4t4Irgbe1gXDIb5i3NNZOZ8geJMyrNniESt77GWQu7Orga1aAoCHHPjXN_3GDDDOkr8RjVoWjeoU64ngGHGlBGK650h15J5JNBWDori7NUWjy4_H9IAY8wc5x1nupq7FH_-paxg\" target=\"_blank\">CTS</a>) airports, disruption may occur at short notice. Flooding and mudslides caused by the storm's passage may also disrupt road travel in southern parts of the island.</span></p>",
+    "createdDate": "2018-10-28T00:30:00.0000000Z",
+    "updatedDate": "2018-10-29T10:05:33.0000000Z",
+    "isWorldWide": false,
+    "activeTo": "2018-11-06T00:00:00.0000000Z",
+    "activeFrom": "2018-10-29T00:00:00.0000000Z",
+    "sites": {
+        "affectedSitesCount": 6,
+        "description": "Building/Sites affected",
+        "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD05M0ZBRDRGNS00MzcwLTQzMjgtOEVEQi1GMjVGOTgyMzlCRDImdmlld3R5cGU9YnVpbGRpbmc="
+    },
+    "members": {
+        "affectedMembersCount": 11,
+        "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD05M0ZBRDRGNS00MzcwLTQzMjgtOEVEQi1GMjVGOTgyMzlCRDImc3RhcnRkYXRlPTEwLzMwLzIwMTgmZW5kZGF0ZT0xMC8zMC8yMDE4JmluY2x1ZGVub25leHBhdHM9dHJ1ZSZpbmNsdWRlZXhwYXRzPXRydWUmdmlld3R5cGU9YWxlcnQ="
+    },
+    "exposureSummary": {
+        "counts": [
+            {
+                "criteriaSetId": "Y",
+                "description": "International assignee affected",
+                "count": 0,
+                "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD05M0ZBRDRGNS00MzcwLTQzMjgtOEVEQi1GMjVGOTgyMzlCRDImc3RhcnRkYXRlPTEwLzI5LzIwMTgmZW5kZGF0ZT0xMS82LzIwMTgmaW5jbHVkZW5vbmV4cGF0cz1mYWxzZSZpbmNsdWRlZXhwYXRzPXRydWUmdmlld3R5cGU9YWxlcnQ="
+            },
+            {
+                "criteriaSetId": "W",
+                "description": "Travelers there while the alert is active",
+                "count": 11,
+                "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD05M0ZBRDRGNS00MzcwLTQzMjgtOEVEQi1GMjVGOTgyMzlCRDImc3RhcnRkYXRlPTEwLzI5LzIwMTgmZW5kZGF0ZT0xMS82LzIwMTgmaW5jbHVkZW5vbmV4cGF0cz10cnVlJmluY2x1ZGVleHBhdHM9ZmFsc2Umdmlld3R5cGU9YWxlcnQ="
+            },
+            {
+                "criteriaSetId": "U",
+                "description": "Travelers there at the time of the incident",
+                "count": 11,
+                "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD05M0ZBRDRGNS00MzcwLTQzMjgtOEVEQi1GMjVGOTgyMzlCRDImc3RhcnRkYXRlPTEwLzI4LzIwMTgmZW5kZGF0ZT0xMS82LzIwMTgmaW5jbHVkZW5vbmV4cGF0cz10cnVlJmluY2x1ZGVleHBhdHM9ZmFsc2Umdmlld3R5cGU9YWxlcnQ="
+            }
+        ]
+    },
+    "relatedAlerts": [
+        {
+            "alertId": "75d4f8b5-8fff-4fb2-9807-6945eaa93c97",
+            "status": "Active",
+            "service": "Security",
+            "severity": "Notice",
+            "severityAttributes": {
+                "Name": "Notice",
+                "Rank": "1",
+                "Icon": "https://ecms-stg-delivery.internationalsos.com//-/media/dynamic-content/severity-icons/severity1.png",
+                "Color": "#009354"
+            },
+            "locations": {
+                "features": [
+                    {
+                        "properties": {
+                            "ImpactType": "Local",
+                            "ImpactRadius": "50",
+                            "Name": "Bacolod City",
+                            "IsPrimary": true,
+                            "CountryIsoList": "PHL",
+                            "CountryNameList": "Philippines"
+                        },
+                        "geometry": {
+                            "coordinates": [
+                                122.95,
+                                10.66667
+                            ],
+                            "type": "Point"
+                        },
+                        "type": "Feature"
+                    },
+                    {
+                        "properties": {
+                            "ImpactType": "Country",
+                            "ImpactRadius": "0",
+                            "Name": "Indonesia",
+                            "IsPrimary": false,
+                            "CountryIsoList": "IDN",
+                            "CountryNameList": "Indonesia"
+                        },
+                        "geometry": {
+                            "coordinates": [
+                                116.542969,
+                                -1.318243
+                            ],
+                            "type": "Point"
+                        },
+                        "type": "Feature"
+                    }
+                ],
+                "type": "FeatureCollection"
+            },
+            "titleLocation": "Philippines, Indonesia",
+            "title": "Bacolod City: Anticipate disruption, heightened security during MassKara festival until",
+            "summary": "<p style=\"background: white;\"><span style=\"color: black;\">Members in or travelling to Bacolod City (Negros Occidental province) should anticipate increased security measures and associated travel disruption until 28 October during the annual MassKara festival. More than 2,000 security personnel will be deployed to secure the festival, particularly during the main events scheduled for 26-28 October at the Bacolod Public Plaza, Lacson Street and the Bacolod City Government Centre areas (<em><span>see map</span></em>).&nbsp; Motorists should plan routes circumventing these locations, as major roads in the vicinity will be closed.</span></p>",
+            "createdDate": "2018-10-30T02:11:32.0000000Z",
+            "updatedDate": "2018-10-30T02:11:32.0000000Z",
+            "categories": [
+                "Key date",
+                "Transport disruption"
+            ],
+            "activeTo": "2018-11-04T00:00:00.0000000Z",
+            "activeFrom": "2018-10-30T00:00:00.0000000Z",
+            "sites": {
+                "affectedSitesCount": 0,
+                "description": "Building/Sites affected",
+                "url": ""
+            },
+            "members": {
+                "affectedMembersCount": 0,
+                "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD03NUQ0RjhCNS04RkZGLTRGQjItOTgwNy02OTQ1RUFBOTNDOTcmc3RhcnRkYXRlPTEwLzMwLzIwMTgmZW5kZGF0ZT0xMC8zMC8yMDE4JmluY2x1ZGVub25leHBhdHM9dHJ1ZSZpbmNsdWRlZXhwYXRzPXRydWUmdmlld3R5cGU9YWxlcnQ="
+            },
+            "exposureSummary": {
+                "counts": [
+                    {
+                        "criteriaSetId": "Y",
+                        "description": "International assignee affected",
+                        "count": 0,
+                        "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD03NUQ0RjhCNS04RkZGLTRGQjItOTgwNy02OTQ1RUFBOTNDOTcmc3RhcnRkYXRlPTEwLzMwLzIwMTgmZW5kZGF0ZT0xMS80LzIwMTgmaW5jbHVkZW5vbmV4cGF0cz1mYWxzZSZpbmNsdWRlZXhwYXRzPXRydWUmdmlld3R5cGU9YWxlcnQ="
+                    },
+                    {
+                        "criteriaSetId": "W",
+                        "description": "Travelers there while the alert is active",
+                        "count": 0,
+                        "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD03NUQ0RjhCNS04RkZGLTRGQjItOTgwNy02OTQ1RUFBOTNDOTcmc3RhcnRkYXRlPTEwLzMwLzIwMTgmZW5kZGF0ZT0xMS80LzIwMTgmaW5jbHVkZW5vbmV4cGF0cz10cnVlJmluY2x1ZGVleHBhdHM9ZmFsc2Umdmlld3R5cGU9YWxlcnQ="
+                    },
+                    {
+                        "criteriaSetId": "V",
+                        "description": "Travelers at the time the alert was published",
+                        "count": 0,
+                        "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD03NUQ0RjhCNS04RkZGLTRGQjItOTgwNy02OTQ1RUFBOTNDOTcmc3RhcnRkYXRlPTEwLzMwLzIwMTgmZW5kZGF0ZT0xMS80LzIwMTgmaW5jbHVkZW5vbmV4cGF0cz10cnVlJmluY2x1ZGVleHBhdHM9ZmFsc2Umdmlld3R5cGU9YWxlcnQ="
+                    }
+                ]
+            }
+        },
+        {
+            "alertId": "575f39e8-8fc5-4973-aea0-072405688c5b",
+            "status": "Active",
+            "service": "Security",
+            "severity": "Special Advisory",
+            "severityAttributes": {
+                "Name": "Special Advisory",
+                "Rank": "3",
+                "Icon": "https://ecms-stg-delivery.internationalsos.com//-/media/dynamic-content/severity-icons/severity3.png",
+                "Color": "#D4002C"
+            },
+            "locations": {
+                "features": [
+                    {
+                        "properties": {
+                            "ImpactType": "Country",
+                            "ImpactRadius": "0",
+                            "Name": "Namibia",
+                            "IsPrimary": true,
+                            "CountryIsoList": "NAM",
+                            "CountryNameList": "Namibia"
+                        },
+                        "geometry": {
+                            "coordinates": [
+                                17.288762,
+                                -21.20101
+                            ],
+                            "type": "Point"
+                        },
+                        "type": "Feature"
+                    }
+                ],
+                "type": "FeatureCollection"
+            },
+            "titleLocation": "Namibia",
+            "title": "Travel Security Alpha Special Advisory_TT_STG_Namibia",
+            "summary": "<p>Storm affected area</p>",
+            "createdDate": "2018-10-26T10:37:34.0000000Z",
+            "updatedDate": "2018-10-26T10:37:34.0000000Z",
+            "categories": [
+                "Storm"
+            ],
+            "activeTo": "2018-11-24T00:00:00.0000000Z",
+            "activeFrom": "2018-10-25T00:00:00.0000000Z",
+            "sites": {
+                "affectedSitesCount": 8,
+                "description": "Building/Sites affected",
+                "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD01NzVGMzlFOC04RkM1LTQ5NzMtQUVBMC0wNzI0MDU2ODhDNUImdmlld3R5cGU9YnVpbGRpbmc="
+            },
+            "members": {
+                "affectedMembersCount": 0,
+                "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD01NzVGMzlFOC04RkM1LTQ5NzMtQUVBMC0wNzI0MDU2ODhDNUImc3RhcnRkYXRlPTEwLzMwLzIwMTgmZW5kZGF0ZT0xMC8zMC8yMDE4JmluY2x1ZGVub25leHBhdHM9dHJ1ZSZpbmNsdWRlZXhwYXRzPXRydWUmdmlld3R5cGU9YWxlcnQ="
+            },
+            "exposureSummary": {
+                "counts": [
+                    {
+                        "criteriaSetId": "Y",
+                        "description": "International assignee affected",
+                        "count": 0,
+                        "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD01NzVGMzlFOC04RkM1LTQ5NzMtQUVBMC0wNzI0MDU2ODhDNUImc3RhcnRkYXRlPTEwLzI1LzIwMTgmZW5kZGF0ZT0xMS8yNC8yMDE4JmluY2x1ZGVub25leHBhdHM9ZmFsc2UmaW5jbHVkZWV4cGF0cz10cnVlJnZpZXd0eXBlPWFsZXJ0"
+                    },
+                    {
+                        "criteriaSetId": "W",
+                        "description": "Travelers there while the alert is active",
+                        "count": 1,
+                        "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD01NzVGMzlFOC04RkM1LTQ5NzMtQUVBMC0wNzI0MDU2ODhDNUImc3RhcnRkYXRlPTEwLzI1LzIwMTgmZW5kZGF0ZT0xMS8yNC8yMDE4JmluY2x1ZGVub25leHBhdHM9dHJ1ZSZpbmNsdWRlZXhwYXRzPWZhbHNlJnZpZXd0eXBlPWFsZXJ0"
+                    },
+                    {
+                        "criteriaSetId": "V",
+                        "description": "Travelers at the time the alert was published",
+                        "count": 1,
+                        "url": "https://betapreprod.travelsecurity.com/Default.aspx?YWxlcnRJZD01NzVGMzlFOC04RkM1LTQ5NzMtQUVBMC0wNzI0MDU2ODhDNUImc3RhcnRkYXRlPTEwLzI1LzIwMTgmZW5kZGF0ZT0xMS8yNC8yMDE4JmluY2x1ZGVub25leHBhdHM9dHJ1ZSZpbmNsdWRlZXhwYXRzPWZhbHNlJnZpZXd0eXBlPWFsZXJ0"
+                    }
+                ]
+            }
+        }
+    ]
+}
