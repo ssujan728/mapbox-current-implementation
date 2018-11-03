@@ -4,6 +4,7 @@
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
     <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <script src="script.js"></script>
 </head>
 
 <body>
@@ -15,31 +16,23 @@
 
     <script>
 
-        mapboxgl.accessToken = "pk.eyJ1IjoiaW50ZXJuYXRpb25hbHNvcyIsImEiOiJjamo1cDNpOWsxdnB2M3BzMjAzNWk1b2FoIn0.49i92ZK8WKifgkSEKtDB7Q";
 
-        var map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v9',
-            zoom: 2
-        });
+        initMap();
 
         map.on('load', function () {
-            var layers = map.getStyle().layers;
-            var firstSymbolId;
-            for (var i = 0; i < layers.length; i++) {
-                if (layers[i].type === 'symbol') {
-                    firstSymbolId = layers[i].id;
-                    break;
-                }
-            }
 
-            var LayerId = "Polygon_Japan";
-            var GeometryType = "MultiPolygon";
-            var Coordinates = null;
-            var Color = "#ffff75";
-            var Opacity = 1;
+            // change this when testing.
+            var countryIsoList = "JPN";
 
-            var IsCountry = false;
+            var layerId = "Polygon_Japan";
+            var geometryType = "MultiPolygon";
+            var coordinates = null;
+            var color = "#ffff75";
+            var opacity = 1;
+            var lineDashArray = "";
+            var lineDashColor = "Blue";
+
+            var isCountry = false;
 
             var MapBouds = {
                 MaxLat: null,
@@ -51,47 +44,33 @@
             var mainBounds = null;
 
             $.getJSON("jpn-polygon.txt", function (polygon) {
-                Coordinates = polygon;
+                coordinates = polygon;
                 //console.log(polygon);
 
                 $.getJSON("jpn-alerts.txt", function (response) {
                     //console.log(alert);
+
                     response.alerts.forEach(alert => {
                         //console.log(alert.alertId);
                         alert.locations.features.forEach(feature => {
-                            if (feature.properties.ImpactType == "Country" && IsCountry == false)
-                                IsCountry = true;
+                            if (feature.properties.ImpactType == "Country" && isCountry == false)
+                                isCountry = true;
                         });
                     });
 
-                    var auxilary = Location_GetCoordinatesAndBounds(Coordinates);
-                    var expandedBound = ExpandBounds(mainBounds, auxilary, true); //has to be true for the country... current row number is being used.
+                    var auxilary = locationGetCoordinatesAndBounds(coordinates);
 
-                    //console.log(expandedBound);
-                    //console.log(auxilary);
+                    if (isCountry) {
+                        lineDashArray = [7, 7]
+                    } else {
+                        lineDashArray = [0, 0]
+                    }
 
-                    map.addLayer({
-                        id: LayerId,
-                        type: 'fill',
-                        source: {
-                            type: 'geojson',
-                            data: {
-                                'type': 'Feature',
-                                'geometry': {
-                                    'type': GeometryType,
-                                    'coordinates': Coordinates
-                                }
-                            }
-                        },
-                        'layout': {},
-                        'paint': {
-                            'fill-color': Color,
-                            'fill-opacity': Opacity
-                        }
-                    }, firstSymbolId);
+                    addLayerToMapbox(layerId, coordinates, '', geometryType, color, opacity, lineDashArray, lineDashColor);
+
+                    var expandedBound = expandBounds(mainBounds, auxilary, true); //has to be true for the country... current row number is being used.
 
                     var coordinateList = [];
-
                     // Loop the alerts
                     response.alerts.forEach(alert => {
                         //console.log(alert.alertId);
@@ -101,7 +80,7 @@
                                 Longitude: 0
                             }
                             feature.geometry.coordinates.forEach(function (coordinate, index) {
-                                if (feature.properties.CountryIsoList == "JPN") {//make it dynamic
+                                if (feature.properties.CountryIsoList == countryIsoList) {
                                     if (index == 0) {
                                         tempCoordinate.Latitude = coordinate; // first element [0] will be the latitude
                                         return;
@@ -117,9 +96,9 @@
 
                                     var imageUrl = $("#image_warning")[0].src;
 
-                                    AddImageLayerToMapbox(layerId, coordinateList, "", imageUrl);
-                                    AddRadiusLayerToMapbox(radiusId, imageUrl, feature.properties.ImpactRadius, tempCoordinate.Longitude, tempCoordinate.Latitude, '', 1)
-                                    AddPopupOnClick(layerId,tempCoordinate.Longitude,tempCoordinate.Latitude,'https://google.com','Google','Halo Halo Halo');
+                                    addImageLayerToMapbox(layerId, coordinateList, "", imageUrl);
+                                    addRadiusLayerToMapbox(radiusId, imageUrl, feature.properties.ImpactRadius, tempCoordinate.Longitude, tempCoordinate.Latitude, '', 1)
+                                    addPopupOnClick(layerId, tempCoordinate.Longitude, tempCoordinate.Latitude, 'https://google.com', 'Google', 'Halo Halo Halo');
 
                                     tempCoordinate.Latitude = 0;
                                     tempCoordinate.Longitude = 0;
@@ -130,8 +109,8 @@
                             })
                         });
                     });
-                    
-                   
+
+
 
                     var bounds = [];
                     var tempBound = [];
@@ -146,271 +125,13 @@
 
                     console.log(bounds);
 
-                    map.fitBounds(bounds,{padding:10});
+                    map.fitBounds(bounds, { padding: 10 });
 
                 });
 
 
             });
         })
-
-        // Get the data stored in the database depending ISO and ISO2
-        // For now load the info from the jpn-polygon.txt
-        function Location_GetCoordinatesAndBounds(polygon) {
-
-            var Auxilary = {
-                MaxLat: null,
-                MinLat: null,
-                MaxLon: null,
-                MinLon: null
-            }
-
-            var polygonString = JSON.stringify(polygon);
-
-            //console.log(polygonString);
-
-            polygonString = polygonString.replace(/\[\[\[/g, '[');
-            polygonString = polygonString.replace(/\[\[/g, "[");
-
-            polygonString = polygonString.replace(/\]\]\]/g, "]");
-            polygonString = polygonString.replace(/\]\]/g, "]");
-
-            polygonString = polygonString.replace(/\[/g, "{\"Lat\":");
-            polygonString = polygonString.replace(/\]\,/g, "#");
-
-            polygonString = polygonString.replace(/\,/g, ",\"Lon\":")
-            polygonString = polygonString.replace(/\#/g, "},")
-            polygonString = polygonString.replace(/\]/g, "}")
-
-            polygonString = "[" + polygonString + "]";
-            //console.log(polygonString)
-            var polygonString = JSON.parse(JSON.stringify(polygonString));
-
-            var polygonObject = JSON.parse(polygonString);
-            polygonObject.sort(sortLatitude);
-
-            Auxilary.MinLat = polygonObject[0].Lat;
-            Auxilary.MaxLat = polygonObject[polygonObject.length - 1].Lat
-
-            polygonObject.sort(sortLongitude);
-
-            Auxilary.MinLon = polygonObject[0].Lon;
-            Auxilary.MaxLon = polygonObject[polygonObject.length - 1].Lon;
-
-            return Auxilary;
-        }
-
-        function ExpandBounds(mainBounds, newBounds, defaultBounds) {
-            var expandedBounds = {
-                MaxLat: null,
-                MinLat: null,
-                MaxLon: null,
-                MinLon: null
-            }
-
-            if (defaultBounds === true) {
-                expandedBounds = newBounds;
-            } else {
-                if (mainBounds.MaxLat >= newBounds.MaxLat) {
-                    expandedBounds.MaxLat = mainBounds.MaxLat;
-                } else {
-                    expandedBounds.MaxLat = newBounds.MaxLat;
-                }
-
-                if (mainBounds.MaxLon >= newBounds.MaxLon) {
-                    expandedBounds.MaxLon = mainBounds.MaxLon;
-                } else {
-                    expandedBounds.MaxLon = newBounds.MaxLon;
-                }
-
-                if (mainBounds.MinLat >= newBounds.MinLat) {
-                    expandedBounds.MinLat = mainBounds.MinLat;
-                } else {
-                    expandedBounds.MinLat = newBounds.MinLat;
-                }
-
-                if (mainBounds.MinLon >= newBounds.MinLon) {
-                    expandedBounds.MinLon = mainBounds.MinLon;
-                } else {
-                    expandedBounds.MinLon = newBounds.MinLon;
-                }
-
-            }
-            return expandedBounds;
-
-
-        }
-
-        //coordinates => array
-        //coordinates => string        
-        function AddImageLayerToMapbox(layerId, coordinates, coordinatesString, imageUrl) {
-
-            var CalculatedCoordinatesString = "";
-            var TempCoordinatesList = []
-
-            if (coordinates.length > 0) {
-                coordinates.forEach(coordinate => {
-                    CalculatedCoordinatesString += CalculatedCoordinatesString + "[" + coordinate.Latitude + "," + coordinate.Longitude + "],"
-                    TempCoordinatesList.push(coordinate.Latitude);
-                    TempCoordinatesList.push(coordinate.Longitude);
-
-                })
-            } else {
-                CalculatedCoordinatesString = coordinatesString;
-            }
-
-            console.log(TempCoordinatesList);
-            map.loadImage(imageUrl, function (error, image) {
-                map.addImage(layerId, image);
-                map.addLayer({
-                    id: layerId,
-                    type: 'symbol',
-
-                    source: {
-                        type: 'geojson',
-                        data: {
-                            type: 'FeatureCollection',
-                            features: [{
-                                type: 'Feature',
-                                geometry: {
-                                    type: 'Point',
-                                    coordinates: TempCoordinatesList
-                                }
-                            }]
-                        }
-                    },
-                    'layout': {
-                        'icon-image': layerId,
-                        'icon-size': 0.40
-                    }
-                });
-            });
-        }
-
-        function AddRadiusLayerToMapbox(layerId, imageUrl, radius, long, lat, color, opacity) {
-            var center = [];
-            center.push(lat);
-            center.push(long);
-
-            map.addSource(layerId, createGeoJSONCircle(center, radius));
-            var layers = map.getStyle().layers;
-            var firstSymbolId;
-            for (var i = 0; i < layers.length; i++) {
-                if (layers[i].type === 'symbol') {
-                    firstSymbolId = layers[i].id;
-                    break;
-                }
-            }
-
-            map.addLayer({
-                'id': layerId,
-                'type': 'fill',
-                'source': layerId,
-                'layout': {},
-                'paint': {
-                    'fill-color': 'red',
-                    'fill-opacity': opacity
-                }
-            }, firstSymbolId);
-
-        }
-
-        function AddPopupOnClick(layerId,longitude,latitude,titleLink,title,otherText) {
-            var layersArrary = [];
-            layersArrary.push(layerId);
-
-            var coordianteArray = [];
-            coordianteArray.push(longitude)
-            coordianteArray.push(latitude)
-
-            map.on('click', function (e) {
-                var features = map.queryRenderedFeatures(e.point, {
-                    layers: layersArrary
-                });
-
-                if (!features.length) {
-                    return;
-                }
-
-                var feature = features[0];
-
-                // for the style
-                var style = ""
-                if(otherText == ""){
-                    style = "display:none";
-                }else{
-                    style = "";
-                }
-
-                var popup = new mapboxgl.Popup({className:'mapbox-bg-High'})
-                    .setLngLat(coordianteArray)
-                    .setHTML("<div>")
-                    .setHTML("<a href=" + titleLink + ">")
-                    .setHTML("<p><b>" + title + "</b></p>")
-                    .setHTML("</a>")
-                    .setHTML("<p style=" + style + ">" + otherText + '</p>')
-                    .setHTML("</div>")
-                    .setLngLat(coordianteArray)
-                    .addTo(map);
-
-            });
-        }
-
-
-        var createGeoJSONCircle = function (center, radiusInKm, points) {
-            if (!points) points = 64;
-
-            var coords = {
-                latitude: center[1],
-                longitude: center[0]
-            };
-
-            var km = radiusInKm;
-
-            var ret = [];
-            var distanceX = km / (111.320 * Math.cos(coords.latitude * Math.PI / 180));
-            var distanceY = km / 110.574;
-
-            var theta, x, y;
-            for (var i = 0; i < points; i++) {
-                theta = (i / points) * (2 * Math.PI);
-                x = distanceX * Math.cos(theta);
-                y = distanceY * Math.sin(theta);
-
-                ret.push([coords.longitude + x, coords.latitude + y]);
-            }
-            ret.push(ret[0]);
-
-            return {
-                type: 'geojson',
-                data: {
-                    type: 'FeatureCollection',
-                    features: [{
-                        type: 'Feature',
-                        geometry: {
-                            type: 'Polygon',
-                            coordinates: ret
-                        }
-                    }]
-                }
-            };
-        };
-
-        function sortLatitude(a, b) {
-            if (a.Lat < b.Lat)
-                return -1;
-            if (a.Lat > b.Lat)
-                return 1;
-            return 0;
-        }
-
-        function sortLongitude(a, b) {
-            if (a.Lon < b.Lon)
-                return -1;
-            if (a.Lon > b.Lon)
-                return 1;
-            return 0;
-        }
     </script>
 
 </body>
