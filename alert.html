@@ -1,0 +1,116 @@
+<html>
+
+<head>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <script src="script.js"></script>
+</head>
+
+<body>
+
+    <div>
+        <div id='map' style='width: 100%; height: 450px;'></div>
+        <img style="display:none" id="image_warning" src="img/warning2.png" />
+    </div>
+
+    <script>
+
+
+        initMap();
+
+        map.on('load', function () {
+
+            // change this when testing.
+            var countryIsoList = "JPN";
+
+            var layerId = "Polygon_Japan";
+            var geometryType = "MultiPolygon";
+            var coordinates = null;
+            var color = "#ffff75";
+            var opacity = 1;
+            var lineDashArray = "";
+            var lineDashColor = "Blue";
+
+            var isCountry = false;
+
+            var mapBounds = {
+                MaxLat: null,
+                MinLat: null,
+                MaxLon: null,
+                MinLon: null
+            }
+
+            //var mainBounds = null;
+
+
+            $.getJSON("target.json", function (alert) {
+                alert.locations.features.forEach((feature, index) => {
+                    //Country Start
+                    if (feature.properties.ImpactType == "Country") {
+                        var countries = feature.properties.CountryIsoList.split(",");
+                        countries.forEach((country, index) => {
+                            console.log(country);
+                            $.getJSON(country + "-polygon.txt", function (coordinates) {
+                                var auxilary = locationGetCoordinatesAndBounds(coordinates);
+                                layerId = "Polygon" + country;
+                                lineDashArray = [7, 7];
+                                lineDashColor = "White";
+                                addLayerToMapbox(layerId, coordinates, '', geometryType, color, opacity, lineDashArray, lineDashColor);
+
+                                if (index == 0)
+                                    defaultBounds = true;
+
+                                var expandedBound = expandBounds(mapBounds, auxilary, defaultBounds)
+                                mapBounds = expandedBound;
+                            })
+                        })
+                    } //Country End
+                    else {
+                        var tempCoordinate = {
+                            Latitude: 0,
+                            Longitude: 0
+                        }
+
+                        tempCoordinate.Latitude = feature.geometry.coordinates[0];
+                        tempCoordinate.Longitude = feature.geometry.coordinates[1];
+                        
+                        //console.log(tempCoordinate);
+
+                        var calculatedBounds = calculateBounds(tempCoordinate, feature.properties.ImpactRadius);
+
+                        if (index == 0 && mapBounds.MaxLat == 0 && mapBounds.MaxLon == 0 && mapBounds.MinLat == 0 & mapBounds.MinLon == 0) {
+                            defaultBounds = true;
+                        } else {
+                            defaultBounds = false;
+                        }
+
+                        var expandedBound = expandBounds(mapBounds, calculatedBounds, defaultBounds)
+                        mapBounds = expandedBound;
+
+                        coordinateList = [];
+                        coordinateList.push(tempCoordinate);
+
+                        var imageUrl = $("#image_warning")[0].src;
+
+                        var layerId = "Image(" + index + "-" + feature.properties.Name + ")";
+
+                        addImageLayerToMapbox(layerId, coordinateList, "", "");
+
+                        //var radiusId = "Radius-" + index + "-" + coordinateIndex + '-' + feature.properties.Name;
+                        var radiusId = "Radius(" + index + "-" + feature.properties.Name + ")";
+                        addRadiusLayerToMapbox(radiusId, "", parseFloat(feature.properties.ImpactRadius), tempCoordinate.Longitude, tempCoordinate.Latitude, '', 1);
+
+                        tempCoordinate.Latitude = 0;
+                        tempCoordinate.Longitude = 0;
+                    }
+                })
+            });
+
+            return;
+        })
+    </script>
+
+</body>
+
+</html>

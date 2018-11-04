@@ -206,7 +206,7 @@ function addImageLayerToMapbox(layerId, coordinates, coordinatesString, imageUrl
                     }]
                 }
             },
-            'layout': {
+            layout: {
                 'icon-image': layerId,
                 'icon-size': 0.40
             }
@@ -219,6 +219,8 @@ function addRadiusLayerToMapbox(layerId, imageUrl, radius, long, lat, color, opa
     center.push(lat);
     center.push(long);
 
+    console.log(center);
+
     map.addSource(layerId, createGeoJSONCircle(center, radius));
     var layers = map.getStyle().layers;
     var firstSymbolId;
@@ -229,12 +231,15 @@ function addRadiusLayerToMapbox(layerId, imageUrl, radius, long, lat, color, opa
         }
     }
 
+    console.log(firstSymbolId);
+    console.log(layerId);
+
     map.addLayer({
-        'id': layerId,
-        'type': 'fill',
-        'source': layerId,
-        'layout': {},
-        'paint': {
+        id: layerId,
+        type: 'fill',
+        source: layerId,
+        layout: {},
+        paint: {
             'fill-color': 'red',
             'fill-opacity': opacity
         }
@@ -308,6 +313,8 @@ var createGeoJSONCircle = function (center, radiusInKm, points) {
     }
     ret.push(ret[0]);
 
+    //console.log(ret);   
+
     return {
         type: 'geojson',
         data: {
@@ -337,4 +344,21 @@ function sortLongitude(a, b) {
     if (a.Lon > b.Lon)
         return 1;
     return 0;
+}
+
+function calculateBounds(coordinateSet, impactRadiusText) {
+    var distY = 0;
+    var distX = 0;
+    var radius = parseFloat(impactRadiusText);
+    if (radius != 0) {
+      var cos = Math.cos(coordinateSet.Latitude * 3.141592654 / 180);
+      distY = Math.abs(radius/(111.320*cos));
+      distX = radius/110.574;
+    }
+    return {
+      MaxLat: coordinateSet.Latitude + distX,
+      MaxLong: coordinateSet.Longtitude + distY,
+      MinLat: coordinateSet.Latitude - distX,
+      MinLong: coordinateSet.Longtitude - distY
+    };
 }
