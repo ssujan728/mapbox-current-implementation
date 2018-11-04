@@ -98,8 +98,8 @@
                         addImageLayerToMapbox(layerId, coordinateList, "", "");
 
                         //var radiusId = "Radius-" + index + "-" + coordinateIndex + '-' + feature.properties.Name;
-                        //var radiusId = "Radius(" + index + "-" + feature.properties.Name + "-" + Date.now() + ")";
-                        var radiusId = "Radius(1-0) Osaka Ohsho";
+                        var radiusId = "Radius(" + index + "-" + feature.properties.Name + "-" + Date.now() + ")";
+                        //var radiusId = "Radius(1-0) Osaka Ohsho";
                         addRadiusLayerToMapbox(radiusId, "", parseFloat(feature.properties.ImpactRadius), parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), '#DC143C', 1);
                         
                         tempCoordinate.Latitude = 0;

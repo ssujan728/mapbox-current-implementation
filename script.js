@@ -321,7 +321,7 @@ var createGeoJSONCircle = function (center, radiusInKm, points) {
         ret.push([coords.longitude + x, coords.latitude + y]);
     }
     ret.push(ret[0]);
-    temp.push(ret);
+    temp.push(ret); // array inside an array otherwise it wont show on the map
     //console.log(ret);   
 
     return {
