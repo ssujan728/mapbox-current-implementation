@@ -216,35 +216,43 @@ function addImageLayerToMapbox(layerId, coordinates, coordinatesString, imageUrl
 
 function addRadiusLayerToMapbox(layerId, imageUrl, radius, long, lat, color, opacity) {
     var center = [];
+
     center.push(lat);
     center.push(long);
 
-    console.log(center);
+    console.log('radius layer start');
+    console.log('createGeoJsonCircle');
+    console.log(center[0]);
+    console.log(center[1]);
+    console.log(radius);
+    console.log(createGeoJSONCircle(center, radius));
 
-    map.addSource(layerId, createGeoJSONCircle(center, radius));
-    var layers = map.getStyle().layers;
-    var firstSymbolId;
-    for (var i = 0; i < layers.length; i++) {
-        if (layers[i].type === 'symbol') {
-            firstSymbolId = layers[i].id;
-            break;
+    //map.on('load', function () {
+        map.addSource(layerId, createGeoJSONCircle(center, radius));
+        var layers = map.getStyle().layers;
+        var firstSymbolId;
+        for (var i = 0; i < layers.length; i++) {
+            console.log(layers[i].type);
+            if (layers[i].type === 'symbol') {
+                firstSymbolId = layers[i].id;
+                break;
+            }
         }
-    }
 
-    console.log(firstSymbolId);
-    console.log(layerId);
+        console.log(firstSymbolId);
+        console.log(layerId);
 
-    map.addLayer({
-        id: layerId,
-        type: 'fill',
-        source: layerId,
-        layout: {},
-        paint: {
-            'fill-color': 'red',
-            'fill-opacity': opacity
-        }
-    }, firstSymbolId);
-
+        map.addLayer({
+            id: layerId,
+            type: 'fill',
+            source: layerId,
+            layout: {},
+            paint: {
+                'fill-color': color,
+                'fill-opacity': opacity
+            }
+        });
+    //});
 }
 
 function addPopupOnClick(layerId, longitude, latitude, titleLink, title, otherText) {
@@ -300,6 +308,7 @@ var createGeoJSONCircle = function (center, radiusInKm, points) {
     var km = radiusInKm;
 
     var ret = [];
+    var temp = [];
     var distanceX = km / (111.320 * Math.cos(coords.latitude * Math.PI / 180));
     var distanceY = km / 110.574;
 
@@ -312,7 +321,7 @@ var createGeoJSONCircle = function (center, radiusInKm, points) {
         ret.push([coords.longitude + x, coords.latitude + y]);
     }
     ret.push(ret[0]);
-
+    temp.push(ret);
     //console.log(ret);   
 
     return {
@@ -323,7 +332,7 @@ var createGeoJSONCircle = function (center, radiusInKm, points) {
                 type: 'Feature',
                 geometry: {
                     type: 'Polygon',
-                    coordinates: ret
+                    coordinates: temp
                 }
             }]
         }
@@ -351,14 +360,14 @@ function calculateBounds(coordinateSet, impactRadiusText) {
     var distX = 0;
     var radius = parseFloat(impactRadiusText);
     if (radius != 0) {
-      var cos = Math.cos(coordinateSet.Latitude * 3.141592654 / 180);
-      distY = Math.abs(radius/(111.320*cos));
-      distX = radius/110.574;
+        var cos = Math.cos(coordinateSet.Latitude * 3.141592654 / 180);
+        distY = Math.abs(radius / (111.320 * cos));
+        distX = radius / 110.574;
     }
     return {
-      MaxLat: coordinateSet.Latitude + distX,
-      MaxLong: coordinateSet.Longtitude + distY,
-      MinLat: coordinateSet.Latitude - distX,
-      MinLong: coordinateSet.Longtitude - distY
+        MaxLat: coordinateSet.Latitude + distX,
+        MaxLong: coordinateSet.Longtitude + distY,
+        MinLat: coordinateSet.Latitude - distX,
+        MinLong: coordinateSet.Longtitude - distY
     };
 }
