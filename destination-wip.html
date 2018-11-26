@@ -1,0 +1,60 @@
+<html>
+
+<head>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <script src="script.js"></script>
+</head>
+
+<body>
+
+    <div>
+        <div id='map' style='width: 100%; height: 450px;'></div>
+        <img style="display:none" id="image_warning" src="img/warning2.png" />
+    </div>
+
+    <script>
+
+        var countryIsoList = "US";
+
+        var layerId = "Polygon_US_" + new Date().getMilliseconds();
+        var geometryType = "MultiPolygon";
+        var coordinates = null;
+        var color = "#ffff75";
+        var opacity = 1;
+        var lineDashArray = "";
+        var lineDashColor = "Blue";
+
+        var country = 'USA'; //CAN - CHN - IND - RUS
+        var zoomLevel = 1;
+
+        var apiUrl = "https://manager-view-exp-qa.au.cloudhub.io/api/exp/map/polygons/" + country + "?zoomlevel=" + zoomLevel;
+
+
+        initMap();
+
+        map.addControl(new mapboxgl.NavigationControl());
+        $.ajax({
+            url: apiUrl,
+            type: 'GET',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Authorization', '123');
+                xhr.setRequestHeader('clientId', 'a098e60561a944b4b24fa895dc43e399');
+                xhr.setRequestHeader('clientSecret', '84820943d47e475Da05184e145F226Ae');
+            },
+            success: function (data) {
+                console.log(data.geometry.coordinates);
+                addLayerToMapbox(layerId, data.geometry.coordinates, '', geometryType, color, opacity, lineDashArray, lineDashColor);
+                
+            }
+        });
+
+        map.on('zoom', function () {
+            console.log(map.getZoom());
+        })
+    </script>
+
+</body>
+
+</html>
