@@ -1,0 +1,214 @@
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.js" crossorigin="anonymous"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="script-integration.js"></script>
+</head>
+
+<body>
+
+    <div>
+        <div id='map' style='width: 100%; height: 450px;'></div>
+        <img style="display:none" id="image_warning" src="img/warning2.png" />
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            var countryIsoList = "USA";
+
+            var country = 'IND'; //CAN - CHN - IND - RUS
+            var zoomLevel = 1;
+            var layerId = "Polygon_" + country;
+            var geometryType = "MultiPolygon";
+            var color = "#ffff75";
+            var opacity = 1;
+            var lineDashArray = [7, 7]; // make it dynamic
+            var lineDashColor = "Blue";
+
+            var mainBounds = null;
+
+            var polygonApiUrl = "https://manager-view-exp-qa.au.cloudhub.io/api/exp/map/polygons/" + country + "?zoomlevel=" + zoomLevel;
+            var alertApiUrl = "https://manager-view-exp-qa.au.cloudhub.io/api/exp/alerts?partyId=123&userId=alexander.oss@internationalsos.com&status=Active&countries=" + country;
+
+            var count = 0;
+
+            initializeMapbox("pk.eyJ1IjoiaW50ZXJuYXRpb25hbHNvcyIsImEiOiJjamo1cDNpOWsxdnB2M3BzMjAzNWk1b2FoIn0.49i92ZK8WKifgkSEKtDB7Q",
+                "map", 'mapbox://styles/mapbox/streets-v9', 1);
+
+            var getPolygon = $.when($.ajax({
+                url: polygonApiUrl,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', '123');
+                    xhr.setRequestHeader('clientId', 'a098e60561a944b4b24fa895dc43e399');
+                    xhr.setRequestHeader('clientSecret', '84820943d47e475Da05184e145F226Ae');
+                }
+            }));
+
+            var getAlert = $.when($.ajax({
+                url: alertApiUrl,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', '123');
+                    xhr.setRequestHeader('clientId', 'a098e60561a944b4b24fa895dc43e399');
+                    xhr.setRequestHeader('clientSecret', '84820943d47e475Da05184e145F226Ae');
+                }
+            }));
+
+            getPolygon.then(function (polygonData, polygonTextStatus, polygonjqXHR) {
+                getAlert.then(function (alertData, alertTextStatus, alertjqXHR) {
+                    //console.log(alertData.alerts);
+                    // todo : check if country and deterime the line dash
+
+                    var auxilary = locationGetCoordinatesAndBounds(polygonData.geometry.coordinates);
+
+                    addLayerToMapbox(layerId + new Date().getTime(), polygonData.geometry.coordinates, geometryType, color, opacity, lineDashArray, lineDashColor);
+
+                    expandedBound = expandBounds(mainBounds, auxilary, true); //has to be true for the country... current row number is being used.
+
+                    var coordinateList = [];
+
+                    alertData.alerts.forEach(function (alert) {
+                        alert.locations.features.forEach(function (feature, index, arr) {
+                            var tempCoordinate = {
+                                Latitude: 0,
+                                Longitude: 0
+                            }
+
+                            if (feature.properties.CountryIsoList == country) {
+
+                                //console.log(feature.geometry.coordinates);
+                                // first element [0] will be the latitude
+                                tempCoordinate.Latitude = feature.geometry.coordinates[0];
+                                tempCoordinate.Longitude = feature.geometry.coordinates[1];
+
+                                //console.log(tempCoordinate);
+
+                                coordinateList = [];
+                                coordinateList.push(tempCoordinate);
+
+                                //console.log(coordinateList);
+
+
+                                var layerId = "Image" + alert.alertId + index + new Date().getTime();
+                                var radiusId = "Radius" + alert.alertId + index + new Date().getTime();
+
+                                var imageUrl = "/img/warning2.png";
+
+                                addImageLayerToMapbox(layerId, coordinateList, imageUrl);
+                                addRadiusLayerToMapbox(radiusId, "", parseFloat(feature.properties.ImpactRadius), parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), '#DC143C', 1);
+
+                                tempCoordinate.Latitude = 0;
+                                tempCoordinate.Longitude = 0;
+
+                            }
+                        })
+
+                    })
+
+
+                    var bounds = [];
+                    var tempBound = [];
+                    tempBound.push(expandedBound.minLat);
+                    tempBound.push(expandedBound.minLon);
+                    bounds.push(tempBound);
+
+                    var tempBound = [];
+                    tempBound.push(expandedBound.maxLat);
+                    tempBound.push(expandedBound.maxLon);
+                    bounds.push(tempBound);
+
+                    map.fitBounds(bounds, { padding: 10 });
+
+                })
+            });
+
+        });
+
+
+
+
+        // $.ajax({
+        //     url: polygonApiUrl,
+        //     type: 'GET',
+        //     beforeSend: function (xhr) {
+        //         xhr.setRequestHeader('Authorization', '123');
+        //         xhr.setRequestHeader('clientId', 'a098e60561a944b4b24fa895dc43e399');
+        //         xhr.setRequestHeader('clientSecret', '84820943d47e475Da05184e145F226Ae');
+        //     },
+        //     success: function (data) {
+        //         console.log(data.geometry.coordinates);
+        //         addLayerToMapbox(layerId, data.geometry.coordinates, geometryType, color, opacity, lineDashArray, lineDashColor);
+
+        //         $.ajax({
+        //             url: alertApiUrl,
+        //             type: 'GET',
+        //             beforeSend: function (xhr) {
+        //                 xhr.setRequestHeader('Authorization', '123');
+        //                 xhr.setRequestHeader('clientId', 'a098e60561a944b4b24fa895dc43e399');
+        //                 xhr.setRequestHeader('clientSecret', '84820943d47e475Da05184e145F226Ae');
+        //             },
+        //             success: function (data) {
+        //                 console.log(data.alerts);
+        //                 var coordinateList = [];
+        //                 console.log('teteette' + data.alerts.length);
+        //                 data.alerts.forEach(alert => {
+        //                     //console.log(alert.alertId);
+        //                     alert.locations.features.forEach(feature => {
+        //                         var tempCoordinate = {
+        //                             Latitude: 0,
+        //                             Longitude: 0
+        //                         }
+        //                         feature.geometry.coordinates.forEach(function (coordinate, index) {
+        //                             if (feature.properties.CountryIsoList == countryIsoList) {
+        //                                 if (index == 0) {
+        //                                     tempCoordinate.Latitude = coordinate; // first element [0] will be the latitude
+        //                                     return;
+        //                                 } else {
+        //                                     tempCoordinate.Longitude = coordinate;
+        //                                 }
+
+        //                                 coordinateList = [];
+        //                                 coordinateList.push(tempCoordinate);
+
+        //                                 var layerId = "Image" + alert.alertId + index + new Date().getTime();
+        //                                 var radiusId = "Radius" + alert.alertId + index + new Date().getTime();
+
+        //                                 var imageUrl = $("#image_warning")[0].src;
+
+        //                                 addImageLayerToMapbox(layerId, coordinateList, "", imageUrl);
+
+        //                                 //addRadiusLayerToMapbox(radiusId, imageUrl, feature.properties.ImpactRadius, tempCoordinate.Longitude, tempCoordinate.Latitude, '', 1)
+        //                                 addRadiusLayerToMapbox(radiusId, "", parseFloat(feature.properties.ImpactRadius), parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), '#DC143C', 1);
+        //                                 //addPopupOnClick(layerId, tempCoordinate.Longitude, tempCoordinate.Latitude, 'https://google.com', 'Google', 'Halo Halo Halo');
+
+        //                                 tempCoordinate.Latitude = 0;
+        //                                 tempCoordinate.Longitude = 0;
+        //                                 count++;
+
+
+        //                             } else {
+        //                                 return;
+        //                             }
+        //                         })
+        //                     });
+        //                 });
+        //                 //addLayerToMapbox(layerId, data.geometry.coordinates, '', geometryType, color, opacity, lineDashArray, lineDashColor);
+        //             }
+        //         });
+
+        //     }
+        // });
+
+
+
+        // map.on('zoom', function () {
+        //     //console.log(map.getZoom());
+        // })
+    </script>
+
+</body>
+
+</html>
