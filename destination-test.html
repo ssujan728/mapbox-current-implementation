@@ -1,0 +1,111 @@
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.js" crossorigin="anonymous"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="script-integration.js"></script>
+</head>
+
+<body>
+
+    <div>
+        <div id='map' style='width: 100%; height: 450px;'></div>
+        <img style="display:none" id="image_warning" src="img/warning2.png" />
+    </div>
+
+    <script>
+        $(document).ready(function () {
+
+            var country = 'DZA'; //CAN - CHN - IND - RUS
+            var getDestinationApiUrl = "https://aihpl-dev.outsystemsenterprise.com//MyAssist/rest/api/GetDestination?";
+            var layerId = "Polygon_" + country;
+            var geometryType = "MultiPolygon";
+            var color = "#ffff75";
+            var opacity = 1;
+            var lineDashArray = [7, 7]; // make it dynamic
+            var lineDashColor = "Blue";
+
+            initializeMapbox("pk.eyJ1IjoiaW50ZXJuYXRpb25hbHNvcyIsImEiOiJjamo1cDNpOWsxdnB2M3BzMjAzNWk1b2FoIn0.49i92ZK8WKifgkSEKtDB7Q",
+                "map", 'mapbox://styles/mapbox/streets-v9', 1);
+
+
+            //getData(country,getDestinationApiUrl,'/img/warning2.png',color,'Security'); //Medical
+            getData(country, getDestinationApiUrl, '/img/warning2.png', color, 'Security'); //Medical
+
+        });
+
+        function getData(countryIso, apiUrl, imageUrl, layerFillColour, service) {
+
+            var country = countryIso;//'USA'; //CAN - CHN - IND - RUS
+            var getDestinationApiUrl = apiUrl + 'IsoCode=' + country + '&Service=' + service;
+            var layerId = "Polygon_" + country;
+            var geometryType = "MultiPolygon";
+            var color = "#ffff75"; // remove it later
+            var opacity = 1;
+            var lineDashArray = [7, 7]; // make it dynamic
+            var lineDashColor = "Blue";
+
+            var mainBounds = null;
+
+
+            var getDestination = $.when($.ajax({
+                url: getDestinationApiUrl,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                }
+            }));
+
+            getDestination.then(function (data, textStatus, jqXHR) {
+                console.log(data);
+                var polygon = JSON.parse(data.PolygonString);
+
+                addLayerToMapbox(layerId + new Date().getTime(), polygon, geometryType, layerFillColour, opacity, lineDashArray, lineDashColor);
+
+                var coordinateList = [];
+
+                if (data.AlertDetails.length > 0) {
+                    data.AlertDetails.forEach(function (alert, index, arr) {
+                        var tempCoordinate = {
+                            Latitude: 0,
+                            Longitude: 0
+                        }
+
+                        tempCoordinate.Latitude = alert.Latitude;
+                        tempCoordinate.Longitude = alert.Longitude;
+                        coordinateList = [];
+                        coordinateList.push(tempCoordinate);
+
+                        var layerId = "Image" + alert.AlertId + index + new Date().getTime();
+                        var radiusId = "Radius" + alert.AlertId + index + new Date().getTime();
+
+                        addImageLayerToMapbox(layerId, coordinateList, imageUrl);
+                        addRadiusLayerToMapbox(radiusId, "", parseFloat(alert.ImpactRadius), parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), '#DC143C', 1);
+
+                        tempCoordinate.Latitude = 0;
+                        tempCoordinate.Longitude = 0;
+
+                    });
+                }
+
+                var bounds = [];
+                var tempBound = [];
+                tempBound.push(data.MapBound.MinLat);
+                tempBound.push(data.MapBound.MinLong);
+                bounds.push(tempBound);
+
+                var tempBound = [];
+                tempBound.push(data.MapBound.MaxLat);
+                tempBound.push(data.MapBound.MaxLong);
+                bounds.push(tempBound);
+
+                map.fitBounds(bounds, { padding: 10 });
+
+            })
+
+        }
+    </script>
+
+</body>
+
+</html>
