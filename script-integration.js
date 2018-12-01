@@ -243,9 +243,10 @@ function addPopupOnClick(layerId, longitude, latitude, titleLink, title, otherTe
     layersArrary.push(layerId);
 
     var coordianteArray = [];
-    coordianteArray.push(longitude)
+    
     coordianteArray.push(latitude)
-
+    coordianteArray.push(longitude)
+    
     map.on('click', function (e) {
         var features = map.queryRenderedFeatures(e.point, {
             layers: layersArrary

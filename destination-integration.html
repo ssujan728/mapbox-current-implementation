@@ -18,7 +18,7 @@
         $(document).ready(function () {
             var countryIsoList = "USA";
 
-            var country = 'USA'; //CAN - CHN - IND - RUS
+            var country = 'AFG'; //CAN - CHN - IND - RUS
             var zoomLevel = 1;
             var layerId = "Polygon_" + country;
             var geometryType = "MultiPolygon";
@@ -30,7 +30,7 @@
             var mainBounds = null;
 
             var polygonApiUrl = "https://manager-view-exp-qa.au.cloudhub.io/api/exp/map/polygons/" + country + "?zoomlevel=" + zoomLevel;
-            var alertApiUrl = "https://manager-view-exp-qa.au.cloudhub.io/api/exp/alerts?partyId=123&userId=alexander.oss@internationalsos.com&status=Active&countries=" + country;
+            var alertApiUrl = "https://manager-view-exp-qa.au.cloudhub.io/api/exp/alerts?partyId=123&userId=alexander.oss@internationalsos.com&status=Active&countries=" + country + "&services=Security";
 
             var count = 0;
 
@@ -59,8 +59,10 @@
 
             getPolygon.then(function (polygonData, polygonTextStatus, polygonjqXHR) {
                 getAlert.then(function (alertData, alertTextStatus, alertjqXHR) {
-                    //console.log(alertData.alerts);
+                    console.log(alertData.alerts);
                     // todo : check if country and deterime the line dash
+
+
 
                     var auxilary = locationGetCoordinatesAndBounds(polygonData.geometry.coordinates);
 
@@ -77,7 +79,8 @@
                                 Longitude: 0
                             }
 
-                            if (feature.properties.CountryIsoList == country) {
+                            //if (feature.properties.CountryIsoList == country) {
+                            if (isCountryInTheIsoList(feature.properties.CountryIsoList, country)) {
 
                                 //console.log(feature.geometry.coordinates);
                                 // first element [0] will be the latitude
@@ -99,6 +102,7 @@
 
                                 addImageLayerToMapbox(layerId, coordinateList, imageUrl);
                                 addRadiusLayerToMapbox(radiusId, "", parseFloat(feature.properties.ImpactRadius), parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), '#DC143C', 1);
+                                //addRadiusLayerToMapbox(radiusId, "", parseFloat(50), parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), '#DC143C', 1);
 
                                 tempCoordinate.Latitude = 0;
                                 tempCoordinate.Longitude = 0;
@@ -207,6 +211,26 @@
         // map.on('zoom', function () {
         //     //console.log(map.getZoom());
         // })
+
+
+        function isCountryInTheIsoList(isoCountryListString, country) {
+            var countryFound = false;
+            // the list contains more than one country as comma seperated string
+            if (isoCountryListString.indexOf(",") !== -1) {
+                var isoCountryList = isoCountryListString.split(",");
+                isoCountryList.forEach(function (isoCountry, index) {
+                    if (isoCountry === country &&  index == 0) {
+                        countryFound = true;
+                    }
+                })
+            } else {
+                if (isoCountryListString == country) {
+                    countryFound = true;
+                }
+            }
+            console.log(countryFound);
+            return countryFound;
+        }
     </script>
 
 </body>
