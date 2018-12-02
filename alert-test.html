@@ -1,0 +1,100 @@
+<html>
+
+<head>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <script src="script-integration.js"></script>
+</head>
+
+<body>
+
+    <div>
+        <div id='map' style='width: 100%; height: 450px;'></div>
+        <img style="display:none" id="image_warning" src="img/warning2.png" />
+    </div>
+
+    <script>
+        $(document).ready(function () {
+
+            //var alertId = "53bcdfc6-58eb-4d0f-a9ab-499cbda9b4dd";
+            //var alertId = "cf34ad73-140a-4807-b460-89157f5262a0"; 
+            var alertId = "245bce66-4637-4b55-a169-d18da03351ca";
+            var alertApiUrl = "https://aihpl-dev.outsystemsenterprise.com/MyAssist/rest/api/GetAlert?" + "AlertId=" + alertId;
+
+            initializeMapbox("pk.eyJ1IjoiaW50ZXJuYXRpb25hbHNvcyIsImEiOiJjamo1cDNpOWsxdnB2M3BzMjAzNWk1b2FoIn0.49i92ZK8WKifgkSEKtDB7Q",
+                "map", 'mapbox://styles/mapbox/streets-v9', 1);
+
+            var getAlert = $.when($.ajax({
+                url: alertApiUrl,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                }
+            }));
+
+            getAlert.then(function (alertData, alertTextStatus, alertjqXHR) {
+                console.log(alertData);
+
+                // for country wide
+                if (alertData.PolygonDetails.length > 0) {
+
+                    var lineDashArrayLayer = [7, 7];
+                    var lineDashColorLayer = "White";
+                    var geometryTypeLayer = "MultiPolygon";
+                    var colorLayer = "#ffff75";
+                    var opacityLayer = 1;
+
+                   
+
+                    alertData.PolygonDetails.forEach(function (polygonDetail, index) {
+                        var coordinates = JSON.parse(polygonDetail.PolygonString);
+                        var layerId = "Image" + alertData.AlertId + index + new Date().getTime();
+                        addLayerToMapbox(layerId, coordinates, geometryTypeLayer, polygonDetail.SeverityColor, opacityLayer, lineDashArrayLayer, lineDashColorLayer);
+                    });
+                }
+
+
+                if (alertData.AlertDetails.length > 0) {
+
+                    alertData.AlertDetails.forEach(function (alert, index) {
+                        var tempCoordinate = {
+                            Latitude: 0,
+                            Longitude: 0
+                        }
+
+                        tempCoordinate.Latitude = alert.Latitude;
+                        tempCoordinate.Longitude = alert.Longitude;
+                        
+                        coordinateList = [];
+                        coordinateList.push(tempCoordinate);
+
+                        var layerId = "Image" + alert.AlertId + index + new Date().getTime();
+                        var radiusId = "Radius" + alert.AlertId + index + new Date().getTime();
+                        //var layerIdTest = "Test" + alert.AlertId + index + new Date().getTime();
+                        var imageUrl = '/img/warning2.png';
+
+                        addImageLayerToMapbox(layerId, coordinateList, imageUrl);
+                        addRadiusLayerToMapbox(radiusId, "", parseFloat(alert.ImpactRadius), parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), alert.SeverityColor , 1);
+                    });
+                }
+
+                var bounds = [];
+                var tempBound = [];
+                tempBound.push(alertData.MapBound.MinLat);
+                tempBound.push(alertData.MapBound.MinLong);
+                bounds.push(tempBound);
+
+                var tempBound = [];
+                tempBound.push(alertData.MapBound.MaxLat);
+                tempBound.push(alertData.MapBound.MaxLong);
+                bounds.push(tempBound);
+
+                map.fitBounds(bounds, { padding: 10 });
+            });
+
+        });
+    </script>
+
+</body>
+
+</html>

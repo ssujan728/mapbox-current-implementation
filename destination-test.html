@@ -18,7 +18,7 @@
         $(document).ready(function () {
 
             var country = 'AFG'; //CAN - CHN - IND - RUS
-            var getDestinationApiUrl = "https://aihpl-dev.outsystemsenterprise.com//MyAssist/rest/api/GetDestination?";
+            var getDestinationApiUrl = "https://aihpl-dev.outsystemsenterprise.com/MyAssist/rest/api/GetDestination?";
             var layerId = "Polygon_" + country;
             var geometryType = "MultiPolygon";
             var color = "#ffff75";
@@ -82,7 +82,7 @@
 
                         addImageLayerToMapbox(layerId, coordinateList, imageUrl);
                         addRadiusLayerToMapbox(radiusId, "", parseFloat(alert.ImpactRadius), parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), '#DC143C', 1);
-                        addPopupOnClick(layerId, parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), 'titleLink', 'title', 'otherText');
+                        //addPopupOnClick(layerId, parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), 'titleLink', 'title', 'otherText');
 
                         tempCoordinate.Latitude = 0;
                         tempCoordinate.Longitude = 0;
