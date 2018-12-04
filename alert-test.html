@@ -1,9 +1,10 @@
 <html>
 
 <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.js" crossorigin="anonymous"></script>
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
-    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    
     <script src="script-integration.js"></script>
 </head>
 
@@ -19,11 +20,20 @@
 
             //var alertId = "53bcdfc6-58eb-4d0f-a9ab-499cbda9b4dd";
             //var alertId = "cf34ad73-140a-4807-b460-89157f5262a0"; 
-            var alertId = "245bce66-4637-4b55-a169-d18da03351ca";
-            var alertApiUrl = "https://aihpl-dev.outsystemsenterprise.com/MyAssist/rest/api/GetAlert?" + "AlertId=" + alertId;
+            var alertId = "4ddd40d1-cc21-446c-b3ec-dd061a049dc7";
+            var alertApiUrl = "https://aihpl-dev.outsystemsenterprise.com/MyAssist/rest/api/GetAlert?";
+            var imageUrl = '/img/warning2.png';
 
             initializeMapbox("pk.eyJ1IjoiaW50ZXJuYXRpb25hbHNvcyIsImEiOiJjamo1cDNpOWsxdnB2M3BzMjAzNWk1b2FoIn0.49i92ZK8WKifgkSEKtDB7Q",
                 "map", 'mapbox://styles/mapbox/streets-v9', 1);
+
+            getAlertData(alertId,alertApiUrl,imageUrl);
+
+        });
+
+        function getAlertData(alertId,apiUrl,imageUrl){
+            
+            var alertApiUrl = apiUrl + "AlertId=" + alertId;
 
             var getAlert = $.when($.ajax({
                 url: alertApiUrl,
@@ -71,7 +81,6 @@
                         var layerId = "Image" + alert.AlertId + index + new Date().getTime();
                         var radiusId = "Radius" + alert.AlertId + index + new Date().getTime();
                         //var layerIdTest = "Test" + alert.AlertId + index + new Date().getTime();
-                        var imageUrl = '/img/warning2.png';
 
                         addImageLayerToMapbox(layerId, coordinateList, imageUrl);
                         addRadiusLayerToMapbox(radiusId, "", parseFloat(alert.ImpactRadius), parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), alert.SeverityColor , 1);
@@ -91,8 +100,7 @@
 
                 map.fitBounds(bounds, { padding: 10 });
             });
-
-        });
+        }
     </script>
 
 </body>
