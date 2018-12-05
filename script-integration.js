@@ -355,3 +355,66 @@ function calculateBounds(coordinateSet, impactRadiusText) {
         MinLong: coordinateSet.Longtitude - distY
     };
 }
+
+function addCircleWithText(layerId, longitude, latitude, text,radius,color,opacity) {
+    var tempCoordinates = [];
+    
+    tempCoordinates.push(latitude);
+    tempCoordinates.push(longitude);
+
+    map.addSource(layerId, {
+        type: 'geojson',
+        data: {
+            type: 'FeatureCollection',
+            features: [
+                {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Point',
+                        coordinates: tempCoordinates
+                    },
+                    properties: {
+                        'museum_count': text
+                    }
+                }]
+        }
+    }
+    );
+    var layers = map.getStyle().layers;
+    var firstSymbolId;
+    for (var i = 0; i < layers.length; i++) {
+        if (layers[i].type === 'symbol') {
+            firstSymbolId = layers[i].id;
+            break;
+        }
+    }
+    map.addLayer({
+        id: layerId,
+        type: 'circle',
+        source: layerId,
+        paint: {
+            'circle-radius': radius,
+            'circle-color': color,
+            'circle-opacity': opacity
+        }
+    }, firstSymbolId);
+
+    map.addLayer({
+        id: layerId + '-label',
+        type: 'symbol',
+        source: layerId,
+        layout: {
+            'text-field': '{museum_count}',
+            'text-font': [
+                'DIN Offc Pro Medium',
+                'Arial Unicode MS Bold'
+            ],
+            'text-size': 12
+        },
+        paint: {
+            'text-color': 'white'
+        }
+
+    });
+
+}

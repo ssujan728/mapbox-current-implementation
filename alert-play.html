@@ -82,8 +82,13 @@
                         var radiusId = "Radius" + alert.AlertId + index + new Date().getTime();
                         //var layerIdTest = "Test" + alert.AlertId + index + new Date().getTime();
 
-                        addImageLayerToMapbox(layerId, coordinateList, imageUrl);
-                        addRadiusLayerToMapbox(radiusId, "", parseFloat(alert.ImpactRadius), parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), alert.SeverityColor , 1);
+                        //addImageLayerToMapbox(layerId, coordinateList, imageUrl);
+                        //addRadiusLayerToMapbox(radiusId, "", parseFloat(alert.ImpactRadius), parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), alert.SeverityColor , 1);
+
+                        
+                        
+                        //var radius = 50;
+                        addCircleWithText(layerId, parseFloat(tempCoordinate.Longitude), parseFloat(tempCoordinate.Latitude), 'text text text',100,alert.SeverityColor,1)
                     });
                 }
 
