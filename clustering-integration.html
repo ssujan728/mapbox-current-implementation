@@ -1,0 +1,359 @@
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.js" crossorigin="anonymous"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
+    <!--Chantal: Start-->
+    <script src="https://unpkg.com/supercluster@3.0.2/dist/supercluster.min.js"></script>
+    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/1.3.4/chroma.min.js"></script>
+    <!--Chantal: End-->
+
+    <script>
+
+        
+    </script>
+</head>
+
+<body>
+
+    <div>
+        <div id='map' style='width: 100%; height: 450px;'></div>
+        <img style="display:none" id="image_warning" src="img/warning2.png" />
+    </div>
+    <div>
+        <button type="button" name="btn" class="trigger_buttons" onclick="" >People At Risk</button>
+        <button type="button" name="btn" class="trigger_buttons" onclick="" >Buildings At Risk</button>
+
+        <button type="button" name="btn" onclick="removeData()" >Reset Data</button>
+        <button type="button" name="btn" onclick="addData()" >Add Data</button>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+
+            $('.trigger_buttons').hide();
+
+            //var alertId = "53bcdfc6-58eb-4d0f-a9ab-499cbda9b4dd";
+            //var alertId = "cf34ad73-140a-4807-b460-89157f5262a0"; 
+            //var alertId = "4ddd40d1-cc21-446c-b3ec-dd061a049dc7";
+            //var alertApiUrl = "https://aihpl-dev.outsystemsenterprise.com/MyAssist/rest/api/GetRiskAlertSummary?UserId=Rekhastage@isos.com&PartyId=123&Authorization=123=";
+            //var imageUrl = '/img/warning2.png';
+            //JavaScript for MapBox
+            var map;
+            var cluster;
+            var initialMap = 'PeopleAtRisk';
+            
+
+            initializeMapbox("pk.eyJ1IjoiaW50ZXJuYXRpb25hbHNvcyIsImEiOiJjamo1cDNpOWsxdnB2M3BzMjAzNWk1b2FoIn0.49i92ZK8WKifgkSEKtDB7Q",
+                "map", 'mapbox://styles/mapbox/streets-v9', 1);
+
+
+
+            var peopleRiskApiUrl = "https://aihpl-dev.outsystemsenterprise.com/MyAssist/rest/api/GetRiskAlertSummary?UserId=Rekhastage@isos.com&PartyId=123&Authorization=123";
+            var buildingRiskApiUrl = "https://aihpl-dev.outsystemsenterprise.com/MyAssist/rest/api/GetBuildingsSummary?UserId=Rekhastage@isos.com&PartyId=123&Authorization=123";
+            
+
+            var getPeopleRiskData = $.when($.ajax({
+                url: peopleRiskApiUrl,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                }
+            }));
+
+            var getBuildingRiskData = $.when($.ajax({
+                url: buildingRiskApiUrl,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                }
+            }));
+
+            getPeopleRiskData.then(function (peopleRiskData, textStatus, jqXHR) {
+                getBuildingRiskData.then(function (buildingRiskData, textStatus, jqXHR) {
+
+                    $('.trigger_buttons').show();
+                    
+                    var _peopleRiskData = peopleRiskData;
+                    var _buildingRiskData = buildingRiskData;
+
+
+
+
+                    console.log(_buildingRiskData);
+                    console.log(_peopleRiskData);
+                });
+            });
+
+
+
+        });
+
+        function removeData(){
+            map.removeLayer("clusters");
+            map.removeLayer("unclustered-point");
+            map.removeLayer("cluster-count");
+            map.removeSource("earthquakes");
+        }
+
+        function addData(){
+            initmap();
+        }
+
+        function initializeMapbox(accessToken, containerId, styleUrl, zoomLevel) {
+            mapboxgl.accessToken = accessToken;
+
+            map = new mapboxgl.Map({
+                container: containerId,
+                style: styleUrl,
+                zoom: zoomLevel
+            });
+
+            var navigationControl = new mapboxgl.NavigationControl();
+
+            $('#' + containerId).on('mouseenter', function () {
+                map.addControl(navigationControl);
+                //addCartoCopyWrite();
+            });
+
+            $('#' + containerId).on('mouseleave', function () {
+                map.removeControl(navigationControl);
+            });
+        }
+        // Chantal: Start 
+        function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+        function updateClusters(repaint) {
+            var worldBounds = [-180.0000, -90.0000, 180.0000, 90.0000];
+            var select_value = "unique";
+            var color = 'YlOrRd';
+            var select_el = "unique";
+            var propertyToAggregate = "id";
+            currentZoom = map.getZoom();
+            clusterData = turf.featureCollection(cluster.getClusters(worldBounds, Math.floor(currentZoom)));
+            //alert(JSON.stringify(clusterData));
+            var stops_domain = chroma.limits(getFeatureDomain(clusterData, select_value), 'e', 8);
+            var scale = chroma.scale(color).domain(stops_domain).mode('lab');
+            colorStops = createColorStops(stops_domain, scale);
+            radiusStops = createRadiusStops(stops_domain, 10, 25);
+            if (repaint) {
+                map.setPaintProperty('clusters', 'circle-color', {
+                    property: select_value,
+                    stops: colorStops
+                });
+                map.setPaintProperty('clusters', 'circle-radius', {
+                    property: select_value,
+                    stops: radiusStops
+                });
+                map.setPaintProperty('unclustered-point', 'circle-color', {
+                    property: propertyToAggregate,
+                    stops: colorStops
+                });
+                map.setLayoutProperty('cluster-count', "text-field", "{" + select_value + "}");
+            }
+        }
+
+        function initmap() {
+            var select_value = "unique";
+            var propertyToAggregate = "id";
+            updateClusters(false);
+            /*select_el.addEventListener('change', function(e) {
+              // Update selected aggregation on dropdown
+              select_value = "unique"
+              updateClusters(true);
+            })*/
+            map.addSource("earthquakes", {
+                type: "geojson",
+                data: clusterData,
+                buffer: 1,
+                maxzoom: 14
+            });
+            map.addLayer({
+                id: "clusters",
+                type: "circle",
+                source: "earthquakes",
+                filter: ["has", "point_count"],
+                paint: {
+                    "circle-color": {
+                        property: select_value,
+                        stops: colorStops
+                    },
+                    "circle-blur": 0.55,
+                    "circle-radius": {
+                        property: select_value,
+                        type: "interval",
+                        stops: radiusStops
+                    }
+                }
+            }, "waterway-label");
+            map.addLayer({
+                id: "unclustered-point",
+                type: "circle",
+                source: "earthquakes",
+                filter: ["!has", "point_count"],
+                paint: {
+                    "circle-color": {
+                        property: propertyToAggregate,
+                        stops: colorStops
+                    },
+                    "circle-radius": 4,
+                    "circle-stroke-width": 1,
+                    "circle-stroke-color": "#fff"
+                }
+            }, "waterway-label");
+            map.addLayer({
+                id: "cluster-count",
+                type: "symbol",
+                source: "earthquakes",
+                filter: ["has", "point_count"],
+                layout: {
+                    "text-field": "{" + select_value + "}",
+                    "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+                    "text-size": 14
+                },
+                paint: {
+                    "text-halo-color": "white",
+                    "text-halo-width": 1
+                }
+            });
+            map.on('zoom', function () {
+                newZoom = map.getZoom();
+                if (Math.floor(currentZoom) == 0) {
+                    currentZoom = 1;
+                };
+                if (Math.floor(newZoom) != Math.floor(currentZoom)) {
+                    currentZoom = newZoom;
+                    updateClusters(true);
+                    map.getSource('earthquakes').setData(clusterData);
+                }
+            });
+        };
+
+        function getFeatureDomain(geojson_data, myproperty) {
+            var data_domain = [];
+            turf.propEach(geojson_data, function (currentProperties, featureIndex) {
+                data_domain.push(Math.round(Number(currentProperties[myproperty]) * 100 / 100));
+            });
+            return data_domain;
+        }
+
+        function createColorStops(stops_domain, scale) {
+            var stops = [];
+            stops_domain.forEach(function (d) {
+                //stops.push([d, scale(d).hex()])
+                stops.push([d, scale(23456).hex()]); // Chantal: Temporarily Changed
+            });
+            return stops;
+        }
+
+        function createRadiusStops(stops_domain, min_radius, max_radius) {
+            var stops = [];
+            var stops_len = stops_domain.length;
+            var count = 1;
+            stops_domain.forEach(function (d) {
+                stops.push([d, min_radius + count / stops_len * (max_radius - min_radius)]);
+                count += 1;
+            });
+            return stops;
+        }
+
+        function performSuperClustering(propertyToAggregate, clusterRadius, clusterMaxZoom) {
+            return supercluster({
+                radius: clusterRadius,
+                maxZoom: clusterMaxZoom,
+                initial: function initial() {
+                    return {
+                        count: 0,
+                        sum: 0,
+                        min: Infinity,
+                        max: -Infinity,
+                        unique: 0,
+                        consolidatedArray: []
+                    };
+                },
+                map: function map(properties) {
+                    return {
+                        count: 1,
+                        sum: Number(properties[propertyToAggregate]),
+                        min: Number(properties[propertyToAggregate]),
+                        max: Number(properties[propertyToAggregate]),
+                        unique: 1,
+                        consolidatedArray: Number(properties[propertyToAggregate]),
+                        placeholder: Number(properties[propertyToAggregate])
+                    };
+                },
+                reduce: function reduce(accumulated, properties) {
+                    accumulated.sum += Math.round(properties.sum * 100) / 100;
+                    accumulated.count += properties.count;
+                    accumulated.min = Math.round(Math.min(accumulated.min, properties.min) * 100) / 100;
+                    accumulated.max = Math.round(Math.max(accumulated.max, properties.max) * 100) / 100;
+                    accumulated.avg = Math.round(100 * accumulated.sum / accumulated.count) / 100;
+
+                    if (accumulated.consolidatedArray.indexOf(properties.consolidatedArray) == -1 && properties.placeholder != null) {
+                        accumulated.unique += properties.unique;
+                        //alert(acculumated.unique + " AND standalone unique: " + properties.unique);
+                        accumulated.consolidatedArray.push(properties.consolidatedArray);
+                    } else {
+                        accumulated.unique += properties.unique;
+                        if (Array.isArray(properties.consolidatedArray)) {
+                            accumulated.consolidatedArray = [].concat(_toConsumableArray(accumulated.consolidatedArray), _toConsumableArray(properties.consolidatedArray)); // PROBLEM
+                        }
+                        var temp = new Set(accumulated.consolidatedArray);
+                        accumulated.unique = temp.size;
+                    }
+                }
+            });
+        }
+
+        function getDataForClustering() {
+            var data_url = "https://aihpl-dev.outsystemsenterprise.com/MyAssist/rest/api/GetRiskAlertSummary?UserId=Rekhastage@isos.com&PartyId=123&Authorization=123";
+            
+
+            var getData = $.when($.ajax({
+                url: data_url,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                }
+            }));
+
+            getData.then(function (data, textStatus, jqXHR) {
+                console.log(data);
+                mydata = data;
+                // Chantal: Start of Data Conversion - from JSON to GEOJSON
+                json = mydata;
+                geojson = json;
+                mydata = geojson;
+                //alert(JSON.stringify(geojson));
+                // CHANTAL - OVERRIDE DATA - END
+                // USE SUPERCLUSTER TO CLUSTER THE GEOJSON DATA
+                cluster = performSuperClustering("id", 20, 14);
+                cluster.load(mydata.features);
+                // CREATE THE MAP
+                initmap();
+            });
+
+
+            // fetch(data_url).then(function (res) {
+            //     return res.json();
+            // }).then(function (out) {
+            //     mydata = out;
+            //     // Chantal: Start of Data Conversion - from JSON to GEOJSON
+            //     json = mydata;
+            //     geojson = json;
+            //     mydata = geojson;
+            //     //alert(JSON.stringify(geojson));
+            //     // CHANTAL - OVERRIDE DATA - END
+            //     // USE SUPERCLUSTER TO CLUSTER THE GEOJSON DATA
+            //     cluster = performSuperClustering("id", 20, 14);
+            //     cluster.load(mydata.features);
+            //     // CREATE THE MAP
+            //     initmap();
+            // }).catch(function (err) {
+            //     return console.error(err);
+            // });
+        }
+    </script>
+
+</body>
+
+</html>
