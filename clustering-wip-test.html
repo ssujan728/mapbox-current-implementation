@@ -1,0 +1,406 @@
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.js" crossorigin="anonymous"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.49.0/mapbox-gl.css' rel='stylesheet' />
+    <!--Chantal: Start-->
+    <script src="https://unpkg.com/supercluster@3.0.2/dist/supercluster.min.js"></script>
+    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/1.3.4/chroma.min.js"></script>
+    <!--Chantal: End-->
+
+    <script>
+
+
+    </script>
+</head>
+
+<body>
+
+    <div>
+        <div id='map' style='width: 100%; height: 450px;'></div>
+        <img style="display:none" id="image_warning" src="img/warning2.png" />
+    </div>
+    <div>
+        <button type="button" name="btn" class="trigger_buttons" onclick="toggleMap('PeopleAtRisk')">People At Risk</button>
+        <button type="button" name="btn" class="trigger_buttons" onclick="toggleMap('BuildingsAtRisk')">Buildings At Risk</button>
+        <button type="button" name="btn" class="trigger_buttons" onclick="toggleMap('TravellingSoon','Medical')">Travelling Soon Medical</button>
+        <button type="button" name="btn" class="trigger_buttons" onclick="toggleMap('TravellingSoon','Security')">Travelling Soon Security</button>
+        <button type="button" name="btn" class="trigger_buttons" onclick="toggleMap('ThereNow','Medical')">There Now Medical</button>
+        <button type="button" name="btn" class="trigger_buttons" onclick="toggleMap('ThereNow','Security')">There Now Security</button>
+        <button type="button" name="btn" class="trigger_buttons" onclick="toggleMap('Case')">Case</button>
+    </div>
+
+    <script>
+
+        var app = {
+            map: "",
+            config: "",
+            dataPeopleAtRisk: "",
+            dataBuildingsAtRisk: "",
+            dataTravellingSoonMedical: "",
+            dataTravellingSoonSecurity: "",
+            dataThereNowMedical: "",
+            dataThereNowSecurity: "",
+            dataCase: "",
+            setConfigurationForMap: function (mapName) {
+                var config = {
+                    propToAgg: "",
+                    selectValue: ""
+                }
+                switch (mapName) {
+                    case "BuildingsAtRisk":
+                        config.propToAgg = "buildingId";
+                        config.selectValue = "unique";
+                        break;
+                    case "PeopleAtRisk":
+                    case "TravellingSoon":
+                    case "ThereNow":
+                        config.propToAgg = "travelerProfileId";
+                        config.selectValue = "unique";
+                        break;
+                    case "Case":
+                        config.propToAgg = "totalCount";
+                        config.selectValue = "sum";
+                        break;
+
+                    default:
+                }
+                app.config = config;
+            },
+            getDataForSpecificMap: function (mapName,type="") {
+
+                return app["data" + mapName + type];
+            },
+            initializeMapbox: function (accessToken, containerId, styleUrl, zoomLevel) {
+                mapboxgl.accessToken = accessToken;
+
+                var map = new mapboxgl.Map({
+                    container: containerId,
+                    style: styleUrl,
+                    zoom: zoomLevel
+                });
+
+                var navigationControl = new mapboxgl.NavigationControl();
+
+                $('#' + containerId).on('mouseenter', function () {
+                    map.addControl(navigationControl);
+                    //addCartoCopyWrite();
+                });
+
+                $('#' + containerId).on('mouseleave', function () {
+                    map.removeControl(navigationControl);
+                });
+
+                this.map = map;
+            },
+            prepareMap: function (mapName,type = "") {
+                this.setConfigurationForMap(mapName);
+                console.log(mapName,type);
+                var data = this.getDataForSpecificMap(mapName,type);
+                console.log(data);
+
+                var mapCluster = performSuperClustering(app.config.propToAgg, 20, 14);
+                mapCluster.load(data.features);
+
+                // CREATE THE MAP
+                initmap(app.map, mapCluster, app.config.selectValue, app.config.propToAgg);
+            },
+            removeMapLayerAndSource: function () {
+                app.map.removeLayer("clusters");
+                app.map.removeLayer("unclustered-point");
+                app.map.removeLayer("cluster-count");
+                app.map.removeSource("building_earthquakes"); /*check this later... it has been to building_earthquakes*/
+            },
+            toggleMap: function (mapName,type) {
+                this.removeMapLayerAndSource();
+                this.setConfigurationForMap(mapName);
+                this.prepareMap(mapName,type);
+            }
+
+        }
+
+        $(document).ready(function () {
+            $('.trigger_buttons').hide();
+
+            var cluster;
+
+            /*to be removed*/
+            var propToAgg = "id";
+            var selectValue = "unique";
+            var initialMap = 'PeopleAtRisk';
+
+            app.initializeMapbox("pk.eyJ1IjoiaW50ZXJuYXRpb25hbHNvcyIsImEiOiJjamo1cDNpOWsxdnB2M3BzMjAzNWk1b2FoIn0.49i92ZK8WKifgkSEKtDB7Q",
+                "map", 'mapbox://styles/mapbox/streets-v9', 1);
+
+            app.setConfigurationForMap(initialMap);
+
+            var peopleAtRiskApiUrl = "https://aihpl-dev.outsystemsenterprise.com/MyAssist/rest/api/GetRiskAlertSummary?UserId=Ajaynath.Sunkara.FRSTG.SOS@internationalsos.com&PartyId=123&Authorization=123";
+            var buildingsAtRiskApiUrl = "https://aihpl-dev.outsystemsenterprise.com/MyAssist/rest/api/GetBuildingsSummary?UserId=Ajaynath.Sunkara.FRSTG.SOS@internationalsos.com&PartyId=123&Authorization=123";
+            var travellingSoonApiUrl = "https://aihpl-dev.outsystemsenterprise.com/MyAssist/rest/api/GetTravelerSummary?Type=TRAVELING_SOON&PartyId=1227&UserId=Rekhastage@isos.com&Authorization=123";
+            var thereNowApiUrl = "https://aihpl-dev.outsystemsenterprise.com/MyAssist/rest/api/GetTravelerSummary?Type=THERE_NOW&PartyId=1227&UserId=Rekhastage@isos.com&Authorization=123";
+            var caseApiUrl = "https://aihpl-dev.outsystemsenterprise.com/MyAssist/rest/api/GetCasesSummary?SfdcAccountId=1227&Authorization=123";
+
+            var getPeopleAtRiskData = $.when($.ajax({
+                url: peopleAtRiskApiUrl,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                }
+            }));
+
+            var getBuildingsAtRiskData = $.when($.ajax({
+                url: buildingsAtRiskApiUrl,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                }
+            }));
+
+            var getTravellingSoonData = $.when($.ajax({
+                url: travellingSoonApiUrl,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                }
+            }));
+
+            var getThereNowData = $.when($.ajax({
+                url: thereNowApiUrl,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                }
+            }));
+
+            var getCaseData = $.when($.ajax({
+                url: caseApiUrl,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                }
+            }));
+
+
+            getPeopleAtRiskData.then(function (peopleAtRiskData, textStatus, jqXHR) {
+                getBuildingsAtRiskData.then(function (buildingsAtRiskData, textStatus, jqXHR) {
+                    getTravellingSoonData.then(function (travellingSoonData, textStatus, jqXHR) {
+                        getThereNowData.then(function (thereNowData, textStatus, jqXHR) {
+                            getCaseData.then(function (caseData, textStatus, jqXHR) {
+                                $('.trigger_buttons').show();
+                                app.dataPeopleAtRisk = peopleAtRiskData;
+                                app.dataBuildingsAtRisk = buildingsAtRiskData;
+
+                                app.dataTravellingSoonMedical = travellingSoonData.Api_GetTravelerSummary_GeoJSON[0];
+                                app.dataTravellingSoonSecurity = travellingSoonData.Api_GetTravelerSummary_GeoJSON[1];
+
+                                app.dataThereNowMedical = thereNowData.Api_GetTravelerSummary_GeoJSON[0];
+                                app.dataThereNowSecurity = thereNowData.Api_GetTravelerSummary_GeoJSON[1];
+                                
+                                app.dataCase = caseData;
+
+                                console.log(app);
+                                app.prepareMap("PeopleAtRisk");
+                            });
+                        });
+                    });
+                });
+            });
+
+        });
+
+        // Chantal: Start 
+        function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+        function updateClusters(mapBox, clusterData, repaint, propertyToAggregate, select_value, colorStops, radiusStops) {
+            if (repaint) {
+                mapBox.setPaintProperty('clusters', 'circle-color', {
+                    property: select_value,
+                    stops: colorStops
+                });
+                mapBox.setPaintProperty('clusters', 'circle-radius', {
+                    property: select_value,
+                    stops: radiusStops
+                });
+                mapBox.setPaintProperty('unclustered-point', 'circle-color', {
+                    property: propertyToAggregate,
+                    stops: colorStops
+                });
+                mapBox.setLayoutProperty('cluster-count', "text-field", "{" + select_value + "}");
+            }
+        }
+
+        function initmap(mapBox, mapCluster, selectValue, propToAgg) {
+            //var select_value = "unique";
+            //var propertyToAggregate = "id";
+            var worldBounds = [-180.0000, -90.0000, 180.0000, 90.0000];
+            var currentZoom = mapBox.getZoom();
+            var clusterData = turf.featureCollection(mapCluster.getClusters(worldBounds, Math.floor(currentZoom)));
+
+            var select_value = selectValue; //"unique";
+            var color = 'YlOrRd';
+            //var select_el = "unique";
+            var propertyToAggregate = propToAgg; //console.log('selectValue ' + selectValue); console.log('selectValue ' + selectValue); ; //"id";
+            var stops_domain = chroma.limits(getFeatureDomain(clusterData, select_value), 'e', 8);
+            var scale = chroma.scale(color).domain(stops_domain).mode('lab');
+            var colorStops = createColorStops(stops_domain, scale);
+            var radiusStops = createRadiusStops(stops_domain, 10, 25);
+            console.log('selectValue ' + selectValue);
+            console.log('propToAgg ' + propToAgg);
+
+            updateClusters(mapBox, clusterData, false, propertyToAggregate, select_value, colorStops, radiusStops);
+
+            /*select_el.addEventListener('change', function(e) {
+              // Update selected aggregation on dropdown
+              select_value = "unique"
+              updateClusters(true);
+            })*/
+
+            mapBox.addSource("building_earthquakes", {
+                type: "geojson",
+                data: clusterData,
+                buffer: 1,
+                maxzoom: 14
+            });
+            mapBox.addLayer({
+                id: "clusters",
+                type: "circle",
+                source: "building_earthquakes",
+                filter: ["has", "point_count"],
+                paint: {
+                    "circle-color": {
+                        property: select_value,
+                        stops: colorStops
+                    },
+                    "circle-blur": 0.55,
+                    "circle-radius": {
+                        property: select_value,
+                        type: "interval",
+                        stops: radiusStops
+                    }
+                }
+            }, "waterway-label");
+            mapBox.addLayer({
+                id: "unclustered-point",
+                type: "circle",
+                source: "building_earthquakes",
+                filter: ["!has", "point_count"],
+                paint: {
+                    "circle-color": {
+                        property: propertyToAggregate,
+                        stops: colorStops
+                    },
+                    "circle-radius": 4,
+                    "circle-stroke-width": 1,
+                    "circle-stroke-color": "#fff"
+                }
+            }, "waterway-label");
+            mapBox.addLayer({
+                id: "cluster-count",
+                type: "symbol",
+                source: "building_earthquakes",
+                filter: ["has", "point_count"],
+                layout: {
+                    "text-field": "{" + select_value + "}",
+                    "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+                    "text-size": 14
+                },
+                paint: {
+                    "text-halo-color": "white",
+                    "text-halo-width": 1
+                }
+            });
+            mapBox.on('zoom', function () {
+                newZoom = mapBox.getZoom();
+                if (Math.floor(currentZoom) == 0) {
+                    currentZoom = 1;
+                };
+                if (Math.floor(newZoom) != Math.floor(currentZoom)) {
+                    currentZoom = newZoom;
+                    updateClusters(mapBox, clusterData, true, propertyToAggregate, select_value, colorStops, radiusStops); /*******************update clusters - doesn't match with function signature**************************/
+                    mapBox.getSource('building_earthquakes').setData(clusterData);
+                }
+            });
+        };
+
+        function getFeatureDomain(geojson_data, myproperty) {
+            var data_domain = [];
+            turf.propEach(geojson_data, function (currentProperties, featureIndex) {
+                data_domain.push(Math.round(Number(currentProperties[myproperty]) * 100 / 100));
+            });
+            return data_domain;
+        }
+
+        function createColorStops(stops_domain, scale) {
+            var stops = [];
+            stops_domain.forEach(function (d) {
+                //stops.push([d, scale(d).hex()])
+                stops.push([d, scale(23456).hex()]); // Chantal: Temporarily Changed
+            });
+            return stops;
+        }
+
+        function createRadiusStops(stops_domain, min_radius, max_radius) {
+            var stops = [];
+            var stops_len = stops_domain.length;
+            var count = 1;
+            stops_domain.forEach(function (d) {
+                stops.push([d, min_radius + count / stops_len * (max_radius - min_radius)]);
+                count += 1;
+            });
+            return stops;
+        }
+
+        function performSuperClustering(propertyToAggregate, clusterRadius, clusterMaxZoom) {
+            return supercluster({
+                radius: clusterRadius,
+                maxZoom: clusterMaxZoom,
+                initial: function initial() {
+                    return {
+                        count: 0,
+                        sum: 0,
+                        min: Infinity,
+                        max: -Infinity,
+                        unique: 0,
+                        consolidatedArray: []
+                    };
+                },
+                map: function map(properties) {
+                    return {
+                        count: 1,
+                        sum: Number(properties[propertyToAggregate]),
+                        min: Number(properties[propertyToAggregate]),
+                        max: Number(properties[propertyToAggregate]),
+                        unique: 1,
+                        consolidatedArray: Number(properties[propertyToAggregate]),
+                        placeholder: Number(properties[propertyToAggregate])
+                    };
+                },
+                reduce: function reduce(accumulated, properties) {
+                    accumulated.sum += Math.round(properties.sum * 100) / 100;
+                    accumulated.count += properties.count;
+                    accumulated.min = Math.round(Math.min(accumulated.min, properties.min) * 100) / 100;
+                    accumulated.max = Math.round(Math.max(accumulated.max, properties.max) * 100) / 100;
+                    accumulated.avg = Math.round(100 * accumulated.sum / accumulated.count) / 100;
+
+                    if (accumulated.consolidatedArray.indexOf(properties.consolidatedArray) == -1 && properties.placeholder != null) {
+                        accumulated.unique += properties.unique;
+                        //alert(acculumated.unique + " AND standalone unique: " + properties.unique);
+                        accumulated.consolidatedArray.push(properties.consolidatedArray);
+                    } else {
+                        accumulated.unique += properties.unique;
+                        if (Array.isArray(properties.consolidatedArray)) {
+                            accumulated.consolidatedArray = [].concat(_toConsumableArray(accumulated.consolidatedArray), _toConsumableArray(properties.consolidatedArray)); // PROBLEM
+                        }
+                        var temp = new Set(accumulated.consolidatedArray);
+                        accumulated.unique = temp.size;
+                    }
+                }
+            });
+        }
+
+        /* UI Function*/
+        function toggleMap(mapName,type="") {
+            app.toggleMap(mapName,type)
+        }
+    </script>
+
+</body>
+
+</html>
