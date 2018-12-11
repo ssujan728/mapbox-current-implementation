@@ -88,7 +88,11 @@
                 }
                 app.config = config;
             },
-            getDataForSpecificMap: function (mapName, type = "") {
+            getDataForSpecificMap: function (mapName, type) {
+
+                if (type === undefined) {
+                    type = "";
+                }
 
                 return app["data" + mapName + type];
             },
@@ -117,7 +121,7 @@
 
                 this.map = map;
             },
-            prepareMap: function (mapName, type = "") {
+            prepareMap: function (mapName, type) {
                 this.setConfigurationForMap(mapName);
                 console.log(mapName, type);
                 var data = this.getDataForSpecificMap(mapName, type);
@@ -127,7 +131,7 @@
                 mapCluster.load(data.features);
 
                 // CREATE THE MAP
-                initmap(app.map, mapCluster, app.config.selectValue, app.config.propToAgg, data.features,app);
+                initmap(app.map, mapCluster, app.config.selectValue, app.config.propToAgg, data.features, app);
             },
             removeMapLayerAndSource: function () {
                 app.map.removeLayer("clusters");
@@ -150,24 +154,24 @@
                 }
                 return content;
             },
-            getPopupContent : function(e) {
-            var distinctSecondary = JSON.parse(e.features[0].properties.distinctArraySecondary);
+            getPopupContent: function (e) {
+                var distinctSecondary = JSON.parse(e.features[0].properties.distinctArraySecondary);
 
-            var htmlString = "<h1><u>Special Advisory</u></h1><br>";
+                var htmlString = "<h1><u>Special Advisory</u></h1><br>";
 
-            for (var i = 0; i < distinctSecondary.length; i++) {
-                //var strArr = distinctSecondary[i].split('}{');
+                for (var i = 0; i < distinctSecondary.length; i++) {
+                    //var strArr = distinctSecondary[i].split('}{');
 
-                // JAVASCRIPT SPLIT BY }{
+                    // JAVASCRIPT SPLIT BY }{
 
-                htmlString = htmlString + (i + 1) + ". " + distinctSecondary[i];
-                if (i != distinctSecondary.length - 1) {
-                    htmlString = htmlString + "</br>";
+                    htmlString = htmlString + (i + 1) + ". " + distinctSecondary[i];
+                    if (i != distinctSecondary.length - 1) {
+                        htmlString = htmlString + "</br>";
+                    }
                 }
-            }
 
-            return htmlString;
-        }
+                return htmlString;
+            }
 
         }
 
@@ -276,7 +280,7 @@
             }
         }
 
-        function initmap(mapBox, mapCluster, selectValue, propToAgg, dataFeatures,app) {
+        function initmap(mapBox, mapCluster, selectValue, propToAgg, dataFeatures, app) {
             //var select_value = "unique";
             //var propertyToAggregate = "id";
             var worldBounds = [-180.0000, -90.0000, 180.0000, 90.0000];
@@ -368,7 +372,13 @@
                 }
             });
 
-            clusterCursorStyle(mapBox);
+            mapBox.on('mouseenter', 'clusters', function () {
+                mapBox.getCanvas().style.cursor = 'pointer';
+            });
+
+            mapBox.on('mouseleave', 'clusters', function () {
+                mapBox.getCanvas().style.cursor = '';
+            });
 
             mapBox.on('click', 'clusters', function (e) {
                 var latLng = e.features[0].geometry.coordinates;
@@ -492,26 +502,9 @@
             });
         }
 
-        /*JENSU*/
-        function clusterCursorStyle(mapBox) {
-            mapBox.on('mouseenter', 'clusters', function () {
-                mapBox.getCanvas().style.cursor = 'pointer';
-            });
-
-            mapBox.on('mouseleave', 'clusters', function () {
-                mapBox.getCanvas().style.cursor = '';
-            });
-        }
-
-
-
-        /*JENSU*/
-
-
-
 
         /* UI Function*/
-        function toggleMap(mapName, type = "") {
+        function toggleMap(mapName, type) {
             app.toggleMap(mapName, type)
         }
     </script>
