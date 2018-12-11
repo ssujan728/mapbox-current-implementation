@@ -299,8 +299,8 @@
         function createColorStops(stops_domain, scale) {
             var stops = [];
             stops_domain.forEach(function (d) {
-                //stops.push([d, scale(d).hex()])
-                stops.push([d, scale(23456).hex()]); // Chantal: Temporarily Changed
+                stops.push([d, scale(d).hex()])
+                //stops.push([d, scale(23456).hex()]); // Chantal: Temporarily Changed
             });
             return stops;
         }

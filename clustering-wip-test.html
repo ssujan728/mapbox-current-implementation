@@ -47,22 +47,30 @@
             setConfigurationForMap: function (mapName) {
                 var config = {
                     propToAgg: "",
-                    selectValue: ""
+                    selectValue: "",
+                    secondaryPropToAgg: ""
                 }
                 switch (mapName) {
                     case "BuildingsAtRisk":
                         config.propToAgg = "buildingId";
                         config.selectValue = "unique";
+                        config.secondaryPropToAgg = "alertId";
                         break;
                     case "PeopleAtRisk":
+                        config.propToAgg = "travelerProfileId";
+                        config.selectValue = "unique";
+                        config.secondaryPropToAgg = "alertId";
+                        break;
                     case "TravellingSoon":
                     case "ThereNow":
                         config.propToAgg = "travelerProfileId";
                         config.selectValue = "unique";
+                        config.secondaryPropToAgg = "countryName"; /******Tentative*****/
                         break;
                     case "Case":
                         config.propToAgg = "totalCount";
                         config.selectValue = "sum";
+                        config.secondaryPropToAgg = "countryName"; /******Tentative*****/
                         break;
 
                     default:
@@ -79,7 +87,10 @@
                 var map = new mapboxgl.Map({
                     container: containerId,
                     style: styleUrl,
-                    zoom: zoomLevel
+                    zoom: zoomLevel,
+                    renderWorldCopies: false,
+                    maxBounds: [[-480, -55], [480, 85]],
+                    center: [-4.53873952326, 54.2241891077]
                 });
 
                 var navigationControl = new mapboxgl.NavigationControl();
