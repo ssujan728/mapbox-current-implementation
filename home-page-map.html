@@ -314,6 +314,9 @@
                                 $('#' + numOfThereNowId).text(app.dataThereNowMedical.affectedNumber);
 
                                 $('#' + numOfOpenCasesId).text(app.dataCase.affectedNumber);
+
+                                $('.TabStructure').show();
+
                                 allMapsLoaded = true;
                                 app.prepareMap(mapNameEnum.PEOPLE_AT_RISK);
                                 popup = new mapboxgl.Popup({
@@ -563,7 +566,7 @@
             return supercluster({
                 radius: clusterRadius,
                 maxZoom: clusterMaxZoom,
-                initial: function initial() {
+                initial: function initial1() {
                     return {
                         count: 0,
                         sum: 0,

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>NYC Cycling Incidents</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css' rel='stylesheet' />
+    <link href="https://api.mapbox.com/mapbox-assembly/v0.21.1/assembly.min.css" rel="stylesheet">
+    <script async defer src="https://api.mapbox.com/mapbox-assembly/v0.21.1/assembly.js"></script>
+    <style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+    }
+    </style>
+</head>
+
+<body>
+    <div class='viewport-full relative clip'>
+        <div class='viewport-twothirds viewport-full-ml relative'>
+            <div id='map' class='absolute top left right bottom'></div>
+        </div>
+        <div class='absolute top-ml left z1 w-full w300-ml px12 py12'>
+            <div class='viewport-third h-auto-ml hmax-full bg-gray-dark round-ml shadow-darken5 scroll-auto'>
+                <div class='p24 my12 mx12 scroll-auto color-white'>
+                    <h3 class='txt-l txt-bold my6 mx6'>NYC Traffic Incidents</h3>
+                    <h5 class='txt-m txt-bold px12'>Bin Cycling Incidents by:</h5>
+                    <div class='select-container py12' id="select-container">
+                        <select class='select' id="select-option">
+                            <option value="sum">sum</option>
+                            <option value="count">count</option>
+                            <option value="avg">avg</option>
+                            <option value="min">min</option>
+                            <option value="max">max</option>
+                        </select>
+                        <div class='select-arrow'></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js'></script>
+        <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+        <script src="https://unpkg.com/supercluster@5.0.0/dist/supercluster.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/1.4.1/chroma.min.js"></script>
+        <script>
+        var select_el = document.getElementById('select-option')
+        var select_value = select_el.value
+
+        var clusterRadius = 20;
+        var clusterMaxZoom = 14;
+        //Property of geojson data I want to aggregate on.  Must be numeric for this example
+        var propertyToAggregate = "CYC_INJ"
+
+        let data_url = 'https://dl.dropboxusercontent.com/s/m4rg8k8l3odz7ma/nyc_pedcyc_collisions_161004.geojson';
+        var mydata;
+        var currentZoom;
+        var color = 'YlOrRd';
+        var clusterData;
+        var worldBounds = [-180.0000, -90.0000, 180.0000, 90.0000];
+
+        // HELPER FUNCTIONS
+        function getFeatureDomain(geojson_data, myproperty) {
+            let data_domain = []
+            turf.propEach(geojson_data, function(currentProperties, featureIndex) {
+                data_domain.push(Math.round(Number(currentProperties[myproperty]) * 100 / 100))
+            })
+            return data_domain
+        }
+
+        function createColorStops(stops_domain, scale) {
+            let stops = []
+            console.log(stops_domain)
+            stops_domain.forEach(function(d) {
+                stops.push([d, scale(d).hex()])
+            });
+            return stops
+        }
+
+        function createRadiusStops(stops_domain, min_radius, max_radius) {
+            let stops = []
+            let stops_len = stops_domain.length
+            let count = 1
+            stops_domain.forEach(function(d) {
+                stops.push([d, min_radius + (count / stops_len * (max_radius - min_radius))])
+                count += 1
+            });
+            return stops
+        }
+
+        //Supercluster with property aggregation
+        var cluster = new Supercluster({
+            radius: clusterRadius,
+            maxZoom: clusterMaxZoom,
+            initial: function() {
+                return {
+                    count: 0,
+                    sum: 0,
+                    min: Infinity,
+                    max: -Infinity
+                };
+            },
+            map: function(properties) {
+                return {
+                    count: 1,
+                    sum: Number(properties[propertyToAggregate]),
+                    min: Number(properties[propertyToAggregate]),
+                    max: Number(properties[propertyToAggregate])
+                };
+            },
+            reduce: function(accumulated, properties) {
+                accumulated.sum += Math.round(properties.sum * 100) / 100;
+                accumulated.count += properties.count;
+                accumulated.min = Math.round(Math.min(accumulated.min, properties.min) * 100) / 100;
+                accumulated.max = Math.round(Math.max(accumulated.max, properties.max) * 100) / 100;
+                accumulated.avg = Math.round(100 * accumulated.sum / accumulated.count) / 100;
+            }
+        });
+
+        mapboxgl.accessToken = 'pk.eyJ1IjoicnNiYXVtYW5uIiwiYSI6ImNqNmhkZnhkZDA4M3Yyd3AwZDR4cmdhcDIifQ.TGKKAC6pPP0L-uMDJ5xFAA';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/dark-v9?optimize=true',
+            center: [-73.8926, 40.6901],
+            zoom: 10,
+            hash: true,
+            maxZoom: 13
+        });
+
+        map.on('style.load', function() {
+            fetch(data_url)
+                .then(res => res.json())
+                .then((out) => {
+                    mydata = out;
+                    // USE SUPERCLUSTER TO CLUSTER THE GEOJSON DATA
+                    cluster.load(mydata.features);
+                    // CREATE THE MAP
+                    initmap();
+                })
+                .catch(err => console.error(err));
+        });
+
+        var colorStops, radiusStops;
+
+        function updateClusters(repaint) {
+            currentZoom = map.getZoom();
+            clusterData = turf.featureCollection(cluster.getClusters(worldBounds, Math.floor(currentZoom)))
+            let domain = getFeatureDomain(clusterData, select_value);
+            var stops_domain = [0, 0, 0, 0, 1]
+            if (domain) {
+                stops_domain = chroma.limits(domain, 'e', 5)
+            }
+            var scale = chroma.scale(color).domain(stops_domain).mode('lab');
+            colorStops = createColorStops(stops_domain, scale);
+            radiusStops = createRadiusStops(stops_domain, 10, 25);
+
+            if (repaint) {
+                map.setPaintProperty('clusters', 'circle-color', {
+                    property: select_value,
+                    stops: colorStops
+                });
+
+                map.setPaintProperty('clusters', 'circle-radius', {
+                    property: select_value,
+                    stops: radiusStops
+                });
+
+                map.setPaintProperty('unclustered-point', 'circle-color', {
+                    property: propertyToAggregate,
+                    stops: colorStops
+                });
+
+                map.setLayoutProperty('cluster-count', "text-field", "{" + select_value + "}");
+            }
+        }
+
+        function initmap() {
+
+            updateClusters(false);
+
+            select_el.addEventListener('change', function(e) {
+                // Update selected aggregation on dropdown
+                select_value = select_el.value
+                updateClusters(true);
+            })
+
+            map.addSource("earthquakes", {
+                type: "geojson",
+                data: clusterData,
+                buffer: 1,
+                maxzoom: 14
+            });
+
+            map.addLayer({
+                id: "clusters",
+                type: "circle",
+                source: "earthquakes",
+                filter: ["has", "point_count"],
+                paint: {
+                    "circle-color": {
+                        property: select_value,
+                        stops: colorStops
+                    },
+                    "circle-blur": ["case", ['==', ["feature-state", 'hover'], 1], 0, 0.55],
+                    "circle-stroke-width": ["case", ['==', ["feature-state", 'hover'], 1], 1.5, 0],
+                    "circle-stroke-color": ["case", ['==', ["feature-state", 'hover'], 1], "white", "rgba(0,0,0,0)"],
+                    "circle-radius": {
+                        property: select_value,
+                        type: "interval",
+                        stops: radiusStops
+                    }
+                }
+            }, "waterway-label");
+
+            map.addLayer({
+                id: "unclustered-point",
+                type: "circle",
+                source: "earthquakes",
+                filter: ["!has", "point_count"],
+                paint: {
+                    "circle-color": {
+                        property: propertyToAggregate,
+                        stops: colorStops
+                    },
+                    "circle-radius": 4,
+                    "circle-stroke-width": 1,
+                    "circle-stroke-color": "#fff"
+                }
+            }, "waterway-label");
+
+            map.addLayer({
+                id: "cluster-count",
+                type: "symbol",
+                source: "earthquakes",
+                filter: ["has", "point_count"],
+                layout: {
+                    "text-field": "{" + select_value + "}",
+                    "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+                    "text-size": 14
+                },
+                paint: {
+                    "text-halo-color": "white",
+                    "text-halo-width": 1
+                }
+
+            });
+
+            map.on('zoom', function() {
+                newZoom = map.getZoom();
+
+                if (Math.floor(currentZoom) == 0) {
+                    currentZoom = 1
+                };
+
+                if (Math.floor(newZoom) != Math.floor(currentZoom)) {
+                    currentZoom = newZoom
+                    updateClusters(true);
+                    map.getSource('earthquakes').setData(clusterData)
+                }
+            });
+
+            var hoverId = 0;
+
+            var onMouseMove = function(e) {
+                var features = map.queryRenderedFeatures(e.point, {
+                    layers: ['clusters']
+                });
+                if (!features.length) {
+                    map.getCanvas().style.cursor = '';
+                    map.setFeatureState({
+                        source: 'earthquakes',
+                        id: hoverId
+                    }, { 'hover': 0 })
+                    hoverId = 0;
+                    return
+                }
+                map.getCanvas().style.cursor = 'pointer';
+                let newHoverId = features[0].id;
+                if (newHoverId != hoverId) {
+                    map.setFeatureState({
+                        source: 'earthquakes',
+                        id: hoverId
+                    }, { 'hover': 0 })
+                    hoverId = newHoverId
+                }
+                map.setFeatureState({
+                    source: 'earthquakes',
+                    id: hoverId
+                }, { 'hover': 1 })
+            };
+
+            map.on('mousemove', onMouseMove);
+        }
+        </script>
+</body>
+
+</html>
