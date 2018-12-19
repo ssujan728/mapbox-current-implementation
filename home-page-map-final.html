@@ -40,6 +40,9 @@
         /*MapBox_Global_Custom_JS - Start*/
         var allMapsLoaded = false;
         var popup;
+        var _travellingSoonLinkId = "";
+        var _thereNowLinkId = "";
+        var _mapType = "";
 
         var mapNameEnum = {
             PEOPLE_AT_RISK: "PeopleAtRisk",
@@ -80,12 +83,12 @@
                     case "ThereNow":
                         config.propToAgg = "travelerProfileId";
                         config.selectValue = "unique";
-                        config.secondaryPropToAgg = "countryName"; 
+                        config.secondaryPropToAgg = "countryName";
                         break;
                     case "Case":
                         config.propToAgg = "totalCount";
                         config.selectValue = "sum";
-                        config.secondaryPropToAgg = "countryName"; 
+                        config.secondaryPropToAgg = "countryName";
                         break;
                     default:
                 }
@@ -134,7 +137,7 @@
                     mapCluster.load(data.features);
                     // CREATE THE MAP
                     initmap(this.map, mapCluster, this.config.selectValue, this.config.propToAgg, data.features, mapName, type);
-                } catch (exception) {"prepareMap - No Dataset Available"}
+                } catch (exception) { "prepareMap - No Dataset Available" }
                 this.map.resize();
             },
             removeMapLayerAndSource: function () {
@@ -146,7 +149,7 @@
                         this.map.removeLayer("uncluster-count");
                     }
                     this.map.removeSource("building_earthquakes"); /*check this later... it has been to building_earthquakes*/
-                } catch (exception) {"removeMapLayerAndSource - No Dataset Available"}
+                } catch (exception) { "removeMapLayerAndSource - No Dataset Available" }
             },
             toggleMap: function (mapName, type) {
                 try {
@@ -154,7 +157,26 @@
                     this.removeMapLayerAndSource();
                     this.setConfigurationForMap(mapName);
                     this.prepareMap(mapName, type);
-                } catch (exception) {"toggleMap - No Dataset Available"}
+                    if (mapName === mapNameEnum.TRAVELING_SOON || mapName === mapNameEnum.THERE_NOW) {
+                        var data = app.getDataForSpecificMap(mapName, type);
+                        var url;
+                        _mapType = type; //not sure if it needs to clear
+                        if (type === 'Medical') {
+                            url = data.medicalUrl;
+                        } else {
+                            url = data.securityUrl;
+                        };
+                        //_thereNowLinkId _travellingSoonLinkId
+                        if (mapName === mapNameEnum.TRAVELING_SOON) {
+                            $("#" + _travellingSoonLinkId).attr("href", url);
+                            $("#" + _travellingSoonLinkId).attr("target", "_blank");
+                        }
+                        if (mapName === mapNameEnum.THERE_NOW) {
+                            $("#" + _thereNowLinkId).attr("href", url);
+                            $("#" + _thereNowLinkId).attr("target", "_blank");
+                        }
+                    }
+                } catch (exception) { "toggleMap - No Dataset Available" }
             },
             getContentForDistinctSecondary: function (mapName, secPropToAgg, properties) {
                 var content = "";
@@ -183,28 +205,29 @@
                 switch (mapName) {
                     case mapNameEnum.PEOPLE_AT_RISK:
                     case mapNameEnum.BUILDINGS_AT_RISK:
-                        htmlString = "<h1><u>Special Advisory</u></h1><br>";
+                        htmlString = "<span class='OpenSans_Regular' style='font-size:13px'>Special Advisory</span><br><div style='margin-top:8px'>";
                         for (var i = 0; i < distinctSecondary.length; i++) {
                             var strArr = distinctSecondary[i].split('}{');
 
-                            htmlString = htmlString + (i + 1) + ". <a href='AlertDetails.aspx?AlertsId=" + strArr[0] + "'>" + strArr[1] + " | " + strArr[2] + "</a>";
+                            htmlString = htmlString + (i + 1) + ". <a class='custom-hyperlink' href='AlertDetails.aspx?AlertsId=" + strArr[0] + "'>" + strArr[1] + " | " + strArr[2] + "</a>";
                             if (i != distinctSecondary.length - 1) {
                                 htmlString = htmlString + "</br>";
                             }
                         }
+                        htmlString = htmlString + '</div>';
                         break;
                     case mapNameEnum.TRAVELING_SOON:
                     case mapNameEnum.THERE_NOW:
                         for (record in distinctSecondary) {
                             var strArr = distinctSecondary[record].split('}{');
-                            htmlString = "<h1><u>" + strArr[1] + " " + type + " Risk</u></h1><br>" + strArr[0];
+                            htmlString = "" + strArr[1] + " " + type + " Risk<br>" + strArr[0];
                         }
                         break;
                     case mapNameEnum.CASE:
                         for (record in distinctSecondary) {
                             var strArr = distinctSecondary[record].split('}{');
-                            htmlString = "<h1>" + strArr[0] + "</h1><br>\
-                              Cases: <a href='CaseUpdates.aspx'>" + strArr[1] + "</a>";
+                            htmlString = "" + strArr[0] + "<br>\
+                      Cases: <a href='CaseUpdates.aspx'>" + strArr[1] + "</a>";
                         }
                         break;
                 }
@@ -222,16 +245,16 @@
                 switch (mapName) {
                     case mapNameEnum.PEOPLE_AT_RISK:
                     case mapNameEnum.BUILDINGS_AT_RISK:
-                        htmlString = "<h1><u>Special Advisory</u></h1><br>\
-                        <a href='AlertDetails.aspx?AlertsId=" + unclustered.alertId + "'>" + unclustered.alertLocation + " | " + unclustered.alertTitle + "</a>";
+                        htmlString = "<span class='OpenSans_Regular' style='font-size:13px'>Special Advisory</span><br>" +
+                            "<div style='margin-top:8px'><a class='custom-hyperlink' href='AlertDetails.aspx?AlertsId=" + unclustered.alertId + "'>" + unclustered.alertLocation + " | " + unclustered.alertTitle + "</a></div>";
                         break;
                     case mapNameEnum.TRAVELING_SOON:
                     case mapNameEnum.THERE_NOW:
-                        htmlString = "<h1><u>" + unclustered.riskRating + " " + type + " Risk</u></h1><br>" + unclustered.countryName;
+                        htmlString = "" + unclustered.riskRating + " " + type + " Risk<br>" + unclustered.countryName;
                         break;
                     case mapNameEnum.CASE: {
-                        htmlString = "<h1>" + unclustered.countryName + "</h1><br>\
-                                          Cases: <a href='CaseUpdates.aspx'>" + unclustered.totalCount + "</a>";
+                        htmlString = "" + unclustered.countryName + "<br>\
+                                  Cases: <a href='CaseUpdates.aspx'>" + unclustered.totalCount + "</a>";
                     }
                         break;
                 }
@@ -240,17 +263,17 @@
 
         }
 
-        function getData(numOfPeopleAtRiskId, numOfBuildingsAtRiskId, numOfTravellingSoonId, numOfThereNowId, numOfOpenCasesId, peopleAtRiskApiUrl, buildingsAtRiskApiUrl, travellingApiUrl, caseApiUrl, authorization, userId, partyId, travellingSoonType, thereNowType, sfdcAccountId) {
+        function getData(numOfPeopleAtRiskId, numOfBuildingsAtRiskId, numOfTravellingSoonId, numOfThereNowId, numOfOpenCasesId, peopleAtRiskApiUrl, buildingsAtRiskApiUrl, travellingApiUrl, caseApiUrl, authorization, userId, partyId, travellingSoonType, thereNowType, sfdcAccountId, travellingSoonLinkId, thereNowLinkId, peopleAtRiskDespId, buildingsAtRiskDespId) {
 
             app.setConfigurationForMap(mapNameEnum.PEOPLE_AT_RISK);
 
-            var peopleAtRiskApiUrl = peopleAtRiskApiUrl + '?' + 'Authorization=' + authorization + '&' + 'UserId=' + 'Ajaynath.Sunkara.FRSTG.SOS@internationalsos.com' + '&' + 'PartyId=' + partyId;
-            var buildingsAtRiskApiUrl = buildingsAtRiskApiUrl + '?' + 'Authorization=' + authorization + '&' + 'UserId=' + 'Ajaynath.Sunkara.FRSTG.SOS@internationalsos.com' + '&' + 'PartyId=' + partyId;
+            var peopleAtRiskApiUrl = peopleAtRiskApiUrl + '?' + 'Authorization=' + authorization + '&' + 'UserId=' + userId + '&' + 'PartyId=' + partyId;
+            var buildingsAtRiskApiUrl = buildingsAtRiskApiUrl + '?' + 'Authorization=' + authorization + '&' + 'UserId=' + userId + '&' + 'PartyId=' + partyId;
 
-            var travellingSoonApiUrl = travellingApiUrl + '?' + 'Authorization=' + authorization + '&PartyId=' + partyId + '&UserId=' + 'Rekhastage@isos.com' + '&Type=' + travellingSoonType;
-            var thereNowApiUrl = travellingApiUrl + '?' + 'Authorization=' + authorization + '&PartyId=' + partyId + '&UserId=' + 'Rekhastage@isos.com' + '&Type=' + thereNowType;
+            var travellingSoonApiUrl = travellingApiUrl + '?' + 'Authorization=' + authorization + '&PartyId=' + partyId + '&UserId=' + userId + '&Type=' + travellingSoonType;
+            var thereNowApiUrl = travellingApiUrl + '?' + 'Authorization=' + authorization + '&PartyId=' + partyId + '&UserId=' + userId + '&Type=' + thereNowType;
 
-            var caseApiUrl = caseApiUrl + '?' + 'SfdcAccountId=' + sfdcAccountId + '&' + 'Authorization=' + authorization;
+            var caseApiUrl = caseApiUrl + '?' + 'SfdcAccountId=' + sfdcAccountId + '&' + 'Authorization=' + authorization + '&UserId=' + userId;
 
             console.log(peopleAtRiskApiUrl);
             console.log(buildingsAtRiskApiUrl);
@@ -304,28 +327,40 @@
             }
 
             $.when(
-                getPeopleAtRiskData(), 
-                getBuildingsAtRiskData(), 
-                getTravellingSoonData(), 
-                getThereNowData(), 
+                getPeopleAtRiskData(),
+                getBuildingsAtRiskData(),
+                getTravellingSoonData(),
+                getThereNowData(),
                 getCaseData())
-                .done(function(
-                    peopleAtRiskData, 
-                    buildingsAtRiskData, 
-                    travellingSoonData, 
-                    thereNowData, 
-                    caseData){
+                .done(function (
+                    peopleAtRiskData,
+                    buildingsAtRiskData,
+                    travellingSoonData,
+                    thereNowData,
+                    caseData) {
                     // the code here will be executed when all four ajax requests resolve.
                     // a1, a2, a3 and a4 are lists of length 3 containing the response text,
                     // status, and jqXHR object for each of the four ajax calls respectively.
                     // $('.trigger_buttons').show();
+
+                    _travellingSoonLinkId = travellingSoonLinkId;
+                    _thereNowLinkId = thereNowLinkId;
+
                     app.dataPeopleAtRisk = peopleAtRiskData[0];
+
+                    $('#' + peopleAtRiskDespId).text(app.dataPeopleAtRisk.description);
+
                     app.dataBuildingsAtRisk = buildingsAtRiskData[0];
 
-                    console.log(JSON.stringify(travellingSoonData));
+                    $('#' + buildingsAtRiskDespId).text(app.dataBuildingsAtRisk.description);
+
+                    //console.log(JSON.stringify(travellingSoonData));
                     try {
                         app.dataTravellingSoonMedical = travellingSoonData[0].Api_GetTravelerSummary_GeoJSON[0];
                         app.dataTravellingSoonSecurity = travellingSoonData[0].Api_GetTravelerSummary_GeoJSON[1];
+                        $("#" + _travellingSoonLinkId).attr("href", app.dataTravellingSoonSecurity.securityUrl);
+                        $("#" + _travellingSoonLinkId).attr("target", "_blank");
+
                     }
                     catch (exception) {
                         app.dataTravellingSoonMedical = travellingSoonData[0]
@@ -334,13 +369,15 @@
                     try {
                         app.dataThereNowMedical = thereNowData[0].Api_GetTravelerSummary_GeoJSON[0];
                         app.dataThereNowSecurity = thereNowData[0].Api_GetTravelerSummary_GeoJSON[1];
+                        $("#" + _thereNowLinkId).attr("href", app.dataThereNowSecurity.securityUrl);
+                        $("#" + _thereNowLinkId).attr("target", "_blank");
                     }
                     catch (exception) {
                         app.dataThereNowMedical = thereNowData[0];
                         app.dataThereNowSecurity = thereNowData[0];
                     }
                     app.dataCase = caseData[0];
-                    
+
                     console.log(app);
 
                     $('#' + numOfPeopleAtRiskId).text(app.dataPeopleAtRisk.affectedNumber);
@@ -357,15 +394,19 @@
                         closeOnClick: true
                     })
                 }
-            );
+                ).fail(function () {
+                    alert('Sorry, Error encountered while loading the maps.')
+                });
         }
         /******************************MapBox_Global_Custom_JS - End******************************/
 
         /*HomePage_JS - Start*/
         function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-        function updateClusters(mapBox, clusterData, repaint, propertyToAggregate, select_value, colorStops, radiusStops) {
-            if (repaint) {
+        function updateClusters(mapBox, clusterData, repaint, propertyToAggregate, select_value, colorStops, radiusStops, mapName) {
+            //console.log("updateClusters-repainting: " + mapName);
+            if (repaint && mapName != null) {
+                /*
                 mapBox.setPaintProperty('clusters', 'circle-color', {
                     property: select_value,
                     stops: colorStops
@@ -374,7 +415,7 @@
                     property: select_value,
                     stops: radiusStops
                 });
-                /*mapBox.setPaintProperty('unclustered-point', 'circle-color', {
+                mapBox.setPaintProperty('unclustered-point', 'circle-color', {
                     property: propertyToAggregate,
                     stops: colorStops
                 }); */
@@ -399,8 +440,8 @@
                 var radiusStops = createRadiusStops(stops_domain, 10, 25);
                 console.log('selectValue ' + selectValue);
                 console.log('propToAgg ' + propToAgg);
-            } catch (exception) {"initmap - No Dataset Available"}
-            updateClusters(mapBox, clusterData, false, propertyToAggregate, select_value, colorStops, radiusStops);
+            } catch (exception) { "initmap - No Dataset Available" }
+            updateClusters(mapBox, clusterData, false, propertyToAggregate, select_value, colorStops, radiusStops, mapName);
 
             mapBox.addSource("building_earthquakes", {
                 type: "geojson",
@@ -415,29 +456,22 @@
                     source: "building_earthquakes",
                     filter: ["has", "point_count"],
                     paint: {
-                        "circle-color": {
-                            property: select_value,
-                            stops: colorStops
-                        },
-                        "circle-blur": 0.55,
-                        "circle-radius": {
-                            property: select_value,
-                            type: "interval",
-                            stops: radiusStops
-                        }
-                    }
-                }, "waterway-label");
-                mapBox.addLayer({
-                    id: "unclustered-point",
-                    type: "circle",
-                    source: "building_earthquakes",
-                    filter: ["!has", "point_count"],
-                    paint: {
-                        "circle-color": "#800026",
-                        "circle-blur": 0.55,
-                        "circle-radius": 10,
-                        "circle-stroke-width": 1,
-                        "circle-stroke-color": "#800026" // #fff
+                        "circle-color": [
+                            'match',
+                            ["to-string", ['get', 'distinctArrayTSTN']],
+                            //'High', 'rgba(243, 45, 27, 0.65)',
+                            '["High"]', '#f32d1b',
+                            '["Extreme"]', '#9f0000',
+                            //'Extreme', 'rgb(159, 0, 0, 0.65)',
+                            //'rgba(212, 0, 44, 0.65)'
+                            '#d4002c'
+                            //'#000000'
+                        ],
+                        //"circle-opacity": 0.65,
+                        "circle-radius": 20,
+                        "circle-stroke-color": "#d9a3b6",
+                        "circle-stroke-width": 0.6,
+                        "circle-stroke-opacity": 0.5
                     }
                 }, "waterway-label");
                 mapBox.addLayer({
@@ -451,27 +485,71 @@
                         "text-size": 14
                     },
                     paint: {
-                        "text-halo-color": "white",
-                        "text-halo-width": 1
+                        "text-color": "white"
                     }
                 });
-
                 mapBox.addLayer({
-                    id: "uncluster-count",
-                    type: "symbol",
+                    id: "unclustered-point",
+                    type: "circle",
                     source: "building_earthquakes",
                     filter: ["!has", "point_count"],
-                    layout: {
-                        "text-field": "{" + select_value + "}",
-                        "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-                        "text-size": 14
-                    },
                     paint: {
-                        "text-halo-color": "white",
-                        "text-halo-width": 1
+                        "circle-color": [
+                            'match',
+                            ['get', 'riskRating'],
+                            //'High', 'rgba(243, 45, 27, 0.65)',
+                            'High', '#f32d1b',
+                            'Extreme', '#9f0000',
+                            //'Extreme', 'rgb(159, 0, 0, 0.65)',
+                            //'rgba(212, 0, 44, 0.65)'
+                            '#d4002c'
+                            //'#000000'
+                        ],
+                        //"circle-opacity": 0.65,
+                        "circle-radius": 20,
+                        "circle-stroke-color": "#d9a3b6",
+                        "circle-stroke-width": 0.6,
+                        "circle-stroke-opacity": 0.5
                     }
-                });
-            } catch (exception) {"addLayer - No Dataset Available"}
+                }, "waterway-label");
+                switch (mapName) {
+                    case mapNameEnum.PEOPLE_AT_RISK:
+                    case mapNameEnum.BUILDINGS_AT_RISK:
+                    case mapNameEnum.TRAVELING_SOON:
+                    case mapNameEnum.THERE_NOW:
+                        mapBox.addLayer({
+                            id: "uncluster-count",
+                            type: "symbol",
+                            source: "building_earthquakes",
+                            filter: ["!has", "point_count"],
+                            layout: {
+                                "text-field": "1",
+                                "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+                                "text-size": 14
+                            },
+                            paint: {
+                                "text-color": "white"
+                            }
+                        });
+                        break;
+                    case mapNameEnum.CASE:
+                        mapBox.addLayer({
+                            id: "uncluster-count",
+                            type: "symbol",
+                            source: "building_earthquakes",
+                            filter: ["!has", "point_count"],
+                            layout: {
+                                "text-field": ["to-string", ['get', 'totalCount']],
+                                "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+                                "text-size": 14
+                            },
+                            paint: {
+                                "text-color": "white"
+                            }
+                        });
+                        break;
+                }
+            } catch (exception) { "addLayer - No Dataset Available" }
             mapBox.on('zoom', function () {
                 newZoom = mapBox.getZoom();
                 if (Math.floor(currentZoom) == 0) {
@@ -479,7 +557,7 @@
                 };
                 if (Math.floor(newZoom) != Math.floor(currentZoom)) {
                     currentZoom = newZoom;
-                    updateClusters(mapBox, clusterData, true, propertyToAggregate, select_value, colorStops, radiusStops); /*******************update clusters - doesn't match with function signature**************************/
+                    updateClusters(mapBox, clusterData, true, propertyToAggregate, select_value, colorStops, radiusStops, null); /*******************update clusters - doesn't match with function signature**************************/
                     mapBox.getSource('building_earthquakes').setData(clusterData);
                 }
             });
@@ -599,7 +677,8 @@
                         unique: 0,
                         uniqueSecondary: 0,
                         consolidatedArray: [],
-                        distinctArraySecondary: []
+                        distinctArraySecondary: [],
+                        distinctArrayTSTN: []
                     };
                 },
                 map: function map(properties) {
@@ -612,6 +691,7 @@
                         uniqueSecondary: 1,
                         consolidatedArray: Number(properties[propertyToAggregate]),
                         distinctArraySecondary: app.getContentForDistinctSecondary(mapName, secondaryPropertyToAggregate, properties),//properties[secondaryPropertyToAggregate] + "}{" + properties["alertLocation"] + "}{" + properties["alertTitle"], //SUJAN
+                        distinctArrayTSTN: properties["riskRating"],
                         placeholder: Number(properties[propertyToAggregate])
                     };
                 },
@@ -627,17 +707,21 @@
                         //alert(acculumated.unique + " AND standalone unique: " + properties.unique);
                         accumulated.consolidatedArray.push(properties.consolidatedArray);
                         accumulated.distinctArraySecondary.push(properties.distinctArraySecondary);
+                        accumulated.distinctArrayTSTN.push(properties.distinctArrayTSTN);
                     } else {
                         accumulated.unique += properties.unique;
                         if (Array.isArray(properties.consolidatedArray)) {
                             accumulated.consolidatedArray = [].concat(_toConsumableArray(accumulated.consolidatedArray), _toConsumableArray(properties.consolidatedArray)); // PROBLEM
                             accumulated.distinctArraySecondary = [].concat(_toConsumableArray(accumulated.distinctArraySecondary), _toConsumableArray(properties.distinctArraySecondary));
+                            accumulated.distinctArrayTSTN = [].concat(_toConsumableArray(accumulated.distinctArrayTSTN), _toConsumableArray(properties.distinctArrayTSTN));
                         }
                         var temp = new Set(accumulated.consolidatedArray);
                         var tempSecondary = new Set(accumulated.distinctArraySecondary);
+                        var tempTSTN = new Set(accumulated.distinctArrayTSTN);
                         accumulated.unique = temp.size;
                         accumulated.distinctArraySecondary = Array.from(tempSecondary);
                         accumulated.uniqueSecondary = tempSecondary.size;
+                        accumulated.distinctArrayTSTN = Array.from(tempTSTN);
                     }
                 }
             });
@@ -688,7 +772,7 @@
 
         /* UI Function*/
         function toggleMap(mapName, type) {
-            try {app.toggleMap(mapName, type)} catch (exception) {"toggleMap - No Dataset Available"} 
+            try { app.toggleMap(mapName, type) } catch (exception) { "toggleMap - No Dataset Available" }
         }
     </script>
 
